@@ -1,0 +1,13 @@
+{
+  "description": "U1 golden case (design doc §2): UF850, TCP offset 0, 3 kg payload, COM [0,0,35] mm in flange frame. Reference: ufactory_genesis_calc/calc_uf850_torque.py.",
+  "robot": "uf850",
+  "tcp_offset": [0, 0, 0, 0, 0, 0],
+  "target_pose": [830, 0, 200, -180, 0, 0],
+  "payload": {"mass_kg": 3.0, "com_mm": [0, 0, 35]},
+  "expected": {
+    "q_deg": [0.0, -86.401, -144.409, -180.0, 58.007, -180.0],
+    "tau_nm": [0.0, 74.958, -30.634, -0.662, 0.0, 0.0],
+    "tau_payload_nm": [0.0, 24.427, -12.972, null, null, null]
+  },
+  "tolerance": {"tau_nm": 1e-3, "q_deg": 1e-3}
+}

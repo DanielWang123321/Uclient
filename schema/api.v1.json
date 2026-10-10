@@ -1,0 +1,375 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Uclient sidecar API",
+  "version": "1.0",
+  "description": "JSON-RPC 2.0 over ws://127.0.0.1:<port>. Units: mm, deg, kg, N·m, s. Pose defaults to TCP (flange ∘ TCP offset). See docs/DESIGN.md §5.",
+  "methods": {
+    "system.hello": {
+      "params": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "api_version": {
+            "type": "string"
+          },
+          "client_version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      }
+    },
+    "system.shutdown": {
+      "params": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "ping": {
+      "params": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "robot.list": {
+      "params": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "robot.info": {
+      "params": {
+        "type": "object",
+        "properties": {
+          "robot": {
+            "type": "string"
+          },
+          "end_effector": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "robot"
+        ]
+      }
+    },
+    "robot.load": {
+      "params": {
+        "type": "object",
+        "properties": {
+          "robot": {
+            "type": "string"
+          },
+          "end_effector": {
+            "type": "string"
+          },
+          "calibration": {
+            "type": [
+              "object",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "robot"
+        ]
+      }
+    },
+    "tcp.set": {
+      "params": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string"
+          },
+          "offset": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 6,
+            "maxItems": 6,
+            "description": "[x,y,z mm, roll,pitch,yaw deg], fixed-axis XYZ"
+          }
+        },
+        "required": [
+          "session_id",
+          "offset"
+        ]
+      }
+    },
+    "payload.set": {
+      "params": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string"
+          },
+          "mass_kg": {
+            "type": "number",
+            "minimum": 0
+          },
+          "com_mm": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "inertia_kgm2": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "number"
+            },
+            "minItems": 6,
+            "maxItems": 6
+          }
+        },
+        "required": [
+          "session_id",
+          "mass_kg",
+          "com_mm"
+        ]
+      }
+    },
+    "kin.fk": {
+      "params": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string"
+          },
+          "q_deg": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "joint angles in degrees, length = dof"
+          },
+          "frames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "session_id",
+          "q_deg"
+        ]
+      }
+    },
+    "kin.ik": {
+      "params": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string"
+          },
+          "target_pose": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 6,
+            "maxItems": 6,
+            "description": "[x,y,z mm, roll,pitch,yaw deg], fixed-axis XYZ"
+          },
+          "frame": {
+            "enum": [
+              "tcp",
+              "flange"
+            ]
+          },
+          "seed_q_deg": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "joint angles in degrees, length = dof"
+          },
+          "mode": {
+            "enum": [
+              "nearest",
+              "all"
+            ]
+          },
+          "tol_mm": {
+            "type": "number"
+          },
+          "tol_deg": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "session_id",
+          "target_pose"
+        ]
+      }
+    },
+    "kin.jacobian": {
+      "params": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string"
+          },
+          "q_deg": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "joint angles in degrees, length = dof"
+          },
+          "frame": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "q_deg"
+        ]
+      }
+    },
+    "dyn.gravity": {
+      "params": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string"
+          },
+          "q_deg": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "joint angles in degrees, length = dof"
+          }
+        },
+        "required": [
+          "session_id",
+          "q_deg"
+        ]
+      }
+    },
+    "dyn.rnea": {
+      "params": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string"
+          },
+          "q_deg": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "joint angles in degrees, length = dof"
+          },
+          "qd_dps": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "joint angles in degrees, length = dof"
+          },
+          "qdd_dps2": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "joint angles in degrees, length = dof"
+          }
+        },
+        "required": [
+          "session_id",
+          "q_deg",
+          "qd_dps",
+          "qdd_dps2"
+        ]
+      }
+    },
+    "dyn.mass_matrix": {
+      "params": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string"
+          },
+          "q_deg": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "joint angles in degrees, length = dof"
+          }
+        },
+        "required": [
+          "session_id",
+          "q_deg"
+        ]
+      }
+    },
+    "check.pose": {
+      "params": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string"
+          },
+          "target_pose": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 6,
+            "maxItems": 6,
+            "description": "[x,y,z mm, roll,pitch,yaw deg], fixed-axis XYZ"
+          },
+          "frame": {
+            "enum": [
+              "tcp",
+              "flange"
+            ]
+          },
+          "seed_q_deg": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "joint angles in degrees, length = dof"
+          }
+        },
+        "required": [
+          "session_id",
+          "target_pose"
+        ]
+      }
+    }
+  },
+  "errors": {
+    "1001": "AUTH_FAILED",
+    "1002": "API_VERSION_MISMATCH",
+    "2001": "ROBOT_NOT_FOUND",
+    "2002": "SESSION_NOT_FOUND",
+    "2003": "ASSET_ERROR",
+    "2004": "CALIBRATION_INVALID",
+    "3001": "IK_UNREACHABLE",
+    "3002": "IK_NOT_CONVERGED",
+    "3003": "JOINT_LIMIT",
+    "3004": "SINGULAR",
+    "4001": "JOB_CANCELLED",
+    "5001": "BACKEND_UNAVAILABLE"
+  }
+}
