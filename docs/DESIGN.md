@@ -8,6 +8,7 @@
 
 | 版本 | 日期 | 变更 |
 |---|---|---|
+| v0.3.1 | 2026-10-10 | Linux 只打 deb 包，取消 AppImage（用户决定）；CI/发布流程、README 同步更新。 |
 | v0.3 | 2026-10-10 | 资源 `assets/urdf` 按 `ufactory_genesis` NOTICE 署名直接随包分发，不再单独核验；v0.1 只打 Linux 包（ubuntu-22.04：AppImage + deb），Windows 10+ 打包移到后续里程碑，代码保持跨平台；额定扭矩运行时从 `ufactory_genesis` 读取、不在本地硬编码，并锁定即将发布的官方额定值版本；xArm 系列只支持 `_1305`；所有待确认问题已关闭。 |
 | v0.2 | 2026-10-10 | 确认个人仓库 `DanielWang123321/Uclient`，README 必须声明“个人项目、非 UFACTORY 官方产品”；校核输入位姿默认 TCP（已叠加 TCP Offset）；负载定义与 UFACTORY Studio 完全一致；前端由 Svelte 5 改为 Vue 3 + TypeScript + Vite + Element Plus，曲线库选 uPlot；暂不修改 `ufactory_genesis`，负载感知的重力/RNEA、纯 Pinocchio IK、FK/Jacobian 都在 sidecar 中实现，经适配层 `backend/` 隔离，上游有接口后再切换；平台收窄为 Linux + Windows 10+，移除 macOS 构建和签名公证；更新待确认问题。 |
 | v0.1 | 2026-10-10 | 初稿。 |
@@ -279,11 +280,11 @@ backend/
 
 - **sidecar**：PyInstaller `--onedir`（比 `--onefile` 启动快，onefile 每次要解压到临时目录），Python 3.12，依赖：`ufactory_genesis`（固定 commit，不带 extras）+ `pin==4.0.0` + `numpy` + `pyyaml` + `websockets`。排除 `torch`、`genesis`、`matplotlib`、`coal`、`hppfcl`、`assimp` 相关模块。产物按 Tauri 约定命名 `uclient-core-<target-triple>`，放 `src-tauri/binaries/`，在 `tauri.conf.json > bundle.externalBin` 声明（onedir 用 `bundle.resources` 带上 `_internal/`）。
 - **资源**：只打包 `assets/urdf/**/*.urdf`、`visual_glb/*.glb`、`kinematics/default/*.yaml`、`assets/configs/runtime/robots/*.yaml`；**不带** `collision/*.stl` 和 `visual/*.stl`（Pinocchio `buildModelFromUrdf` 不读 mesh；前端只用 GLB）。估计 ≈ 6–8 MB。
-- **GitHub Actions**：v0.1 只有一个打包目标 `ubuntu-22.04`（x64；较老的 glibc 以兼容更多发行版），产物 AppImage + deb。步骤：checkout（含 ufactory_genesis 按锁定 tag 拉取）→ setup-python 3.12 → 构建 sidecar → sidecar 冒烟测试（跑 U1 金标准）→ `pnpm build` → `tauri-apps/tauri-action` 打包 → 上传到 Draft Release。PyInstaller 不能交叉编译，以后加 Windows 时在矩阵中增加 `windows-latest`（NSIS + MSI，Windows 10 需 WebView2，`webviewInstallMode: downloadBootstrapper`）。为保持跨平台：路径一律用 `pathlib`/Tauri path API，sidecar 不依赖 POSIX 专有调用；CI 另跑一个**不打包**的 `windows-latest` 单元测试 job（sidecar pytest + 前端 vitest），尽早发现平台问题。macOS 不在计划内。
+- **GitHub Actions**：v0.1 只有一个打包目标 `ubuntu-22.04`（x64；较老的 glibc 以兼容更多发行版），产物仅 deb（v0.3.1 起取消 AppImage）。步骤：checkout（含 ufactory_genesis 按锁定 tag 拉取）→ setup-python 3.12 → 构建 sidecar → sidecar 冒烟测试（跑 U1 金标准）→ `pnpm build` → `tauri-apps/tauri-action` 打包 → 上传到 Draft Release。PyInstaller 不能交叉编译，以后加 Windows 时在矩阵中增加 `windows-latest`（NSIS + MSI，Windows 10 需 WebView2，`webviewInstallMode: downloadBootstrapper`）。为保持跨平台：路径一律用 `pathlib`/Tauri path API，sidecar 不依赖 POSIX 专有调用；CI 另跑一个**不打包**的 `windows-latest` 单元测试 job（sidecar pytest + 前端 vitest），尽早发现平台问题。macOS 不在计划内。
 - **签名**：v0.1 只发 Linux，不需要代码签名，发布时附 SHA256（可选 GPG 签名）。Windows 代码签名等到 M5 加入 Windows 打包时再定，目前不涉及。
 - **体积估算**（方法：实测本机 `genesis-venv`：`pinocchio` Python 包 45 MB、`libpinocchio_default.so` 8.3 MB、numpy 33 MB；`cmeel.prefix` 里大量是 `include/`（197 MB，不打包）、`coal` 11 MB 和 `assimp` 14 MB（可排除）；Python 运行时约 15 MB；Tauri 壳 Rust 二进制约 6–10 MB，前端（Vue 3 + 按需引入的 Element Plus + three.js + uPlot，gzip 前约 1.5–2.5 MB）；资源约 7 MB）：
   - 解压后约 **110–150 MB**；安装包（zstd/lzma 压缩，二进制库压缩率约 35–45%）约 **45–70 MB**。
-  - Linux 依赖系统 `libwebkit2gtk-4.1`，deb 声明依赖，AppImage 不内置。（以后的 Windows 包：WebView2 由系统提供，不计入包体。）
+  - Linux 依赖系统 `libwebkit2gtk-4.1`，由 deb 声明依赖。（以后的 Windows 包：WebView2 由系统提供，不计入包体。）
   - 若 pinocchio 的 Boost.Python 依赖无法裁剪，上限按 80 MB 估。第一个 CI 产物出来后以实测为准。
   - 对比：带 Genesis + CPU 版 torch，额外增加约 500 MB–1 GB，因此作为独立下载的可选模块。
 
@@ -354,7 +355,7 @@ Uclient/
 | M0 设计 | 本文档审核；建 Uclient 仓库骨架、CI 空跑（Linux 打包 + Windows 单元测试）| 0.5 周 |
 | M1 核心 | sidecar：适配层 + 自带 FK/Jacobian/IK、负载感知 gravity/RNEA + 金标准测试；Linux PyInstaller 产物 + 体积实测；锁定带官方额定扭矩的 `ufactory_genesis` tag（若已发布）| 1.5–2 周 |
 | M2 MVP 界面 | Tauri 壳 + Vue/Element Plus 界面 + 3D 视图 + 校核页（关节点动、TCP 输入 IK、扭矩面板、COM 标记、CSV）| 2 周 |
-| **v0.1.0** | Linux 安装包（AppImage + deb）、中英文、README（含个人项目声明）| — |
+| **v0.1.0** | Linux 安装包（deb）、中英文、README（含个人项目声明）| — |
 | M3 轨迹 | RNEA、轨迹插值、回放、uPlot τ(t) 曲线、HTML 报告 | 2 周 |
 | M4 工作空间 & 标定 | 工作空间采样与着色、SN 标定 YAML 导入、TCP gizmo 拖拽 | 2 周 |
 | **v0.2.0** | 自动更新、HTML 报告 | — |

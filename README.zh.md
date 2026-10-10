@@ -22,7 +22,7 @@ Uclient 是一个开源桌面客户端（Tauri v2 + Vue 3），基于 [`ufactory
 | `check.pose`：TCP 位姿 → 全部 IK 解 + 扭矩（U1 金标准用例） | ✅ |
 | Tauri 壳：引擎生命周期、端口/token 握手、崩溃重启 | ✅ |
 | 校核页：机型/TCP/负载面板、关节滑块、IK、扭矩表、CSV、3D 视图 | ✅ 初版 |
-| CI 中打 Linux AppImage / deb 包 | ✅（未签名的开发构建） |
+| CI 中打 Linux deb 包 | ✅（未签名的开发构建） |
 | 轨迹与 τ(t) 曲线（M3）、工作空间与标定（M4） | ⏳ |
 
 计算结果是**静态模型**：URDF 名义惯性参数，不含摩擦、减速器效率和单机标定。额定扭矩运行时从 `ufactory_genesis` 读取（当前锁定 commit `60fe926`，为开发用数值），官方额定扭矩版本发布后切换。
@@ -45,7 +45,7 @@ cd apps/desktop && pnpm install && pnpm test
 # 3. 用开发版引擎运行桌面应用
 UCLIENT_CORE_CMD="$PWD/../../.venv/bin/python -m uclient_core" pnpm tauri dev
 
-# 4. 打包（AppImage + deb）
+# 4. 打包（deb）
 cd ../.. && .venv/bin/python scripts/build_sidecar.py
 cd apps/desktop && pnpm tauri build --config src-tauri/tauri.bundle.conf.json
 ```

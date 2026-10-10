@@ -19,7 +19,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["deb", "appimage"],
+    "targets": ["deb"],
     "category": "Utility",
     "shortDescription": "Kinematics / dynamics client for UFACTORY arms (personal project)",
     "license": "MIT",

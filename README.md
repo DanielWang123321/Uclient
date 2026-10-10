@@ -22,7 +22,7 @@ Early development (milestone M0/M1, see [docs/DESIGN.md](docs/DESIGN.md) §14).
 | `check.pose`: TCP pose → all IK solutions + torques (U1 golden case) | ✅ |
 | Tauri shell: sidecar lifecycle, port/token handshake, crash restart | ✅ |
 | Check page: model/TCP/payload panels, joint sliders, IK, torque table, CSV, 3D view | ✅ first version |
-| Linux AppImage / deb packaging in CI | ✅ (unsigned, development builds) |
+| Linux deb packaging in CI | ✅ (unsigned, development builds) |
 | Trajectory + τ(t) curves (M3), workspace & calibration (M4) | ⏳ |
 
 Results are **static models**: nominal URDF inertia, no friction, gearbox efficiency or per-unit calibration. Rated torques are read at runtime from `ufactory_genesis` (currently pinned to commit `60fe926`, development values) and will switch to the release carrying official ratings.
@@ -45,7 +45,7 @@ cd apps/desktop && pnpm install && pnpm test
 # 3. Run the desktop app against the dev sidecar
 UCLIENT_CORE_CMD="$PWD/../../.venv/bin/python -m uclient_core" pnpm tauri dev
 
-# 4. Package (AppImage + deb)
+# 4. Package (deb)
 cd ../.. && .venv/bin/python scripts/build_sidecar.py   # PyInstaller onedir + smoke test
 cd apps/desktop && pnpm tauri build --config src-tauri/tauri.bundle.conf.json
 ```
