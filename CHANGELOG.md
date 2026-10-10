@@ -4,6 +4,20 @@ All notable changes to UGClient (formerly Uclient) are documented here. Format: 
 
 ## [Unreleased]
 
+### Added
+- Bottom motion control bar on the Check page (simulation only, no real robot): speed slider (default 50 %), Home (all joints to 0), Align and STOP; J1-J6 colored sliders with limits, value box and -/+ buttons; Z-/Z+ and Yaw-/Yaw+ buttons with round XYZ and RPY jog pads. Collapsible.
+- Click moves one step (1 mm / 1 deg); press and hold (> 300 ms) moves continuously until release. Release or STOP sets the simulated state to 4. 100 % speed = 230 mm/s linear, 40 deg/s joints and rotation. Constants live in `apps/desktop/src/lib/motion.ts` until a settings page exists.
+- Sidecar methods `motion.jog_tcp` (base-frame TCP increment via IK, with joint-jump and joint-limit guards) and `motion.align` (only the last three joints move so the tool z-axis points straight down, roll 180 / pitch 0 / current heading; TCP position may change; error if unreachable).
+- Joint limit hits and unreachable targets stop the motion and show a dialog.
+
+### Changed
+- New window shell matching the v8 mockup: a light 3D scene (background #f7f8f9, light grid, fog) fills the window; dark rounded floating panels sit on top (left: robot / TCP offset / payload with connection status and language switch; right: read-only state; bottom: motion bar; top centre: view toolbar with reset view and Base/TCP/COM toggles). The camera frames the robot's reach in the free area between the panels.
+- The light top bar, status footer and the Check/Trajectory/Workspace tabs are removed for now (Trajectory and Workspace were placeholders).
+- Check page now follows the approved v8 mockup: the right panel is a read-only state view (state, mode, payload, mounting, TCP pose, joint angles); joint sliders live in the motion bar.
+
+### Removed
+- Check page "Target TCP pose / Solve IK" section, the joint torque table (incl. CSV export button) and the left-panel Status (TCP/Flange) block. The sidecar methods (`check.pose`, `kin.ik`, `dyn.gravity`) and store functions remain.
+
 ## [0.1.1] - 2026-10-10
 
 ### Changed

@@ -23,3 +23,39 @@ body {
 .num { font-variant-numeric: tabular-nums; font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; }
 .panel-title { font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: #57606a; margin: 10px 0 6px; }
 .hint { color: #6e7781; font-size: 11px; line-height: 1.4; }
+
+// Dark floating panels (v8 mockup): headings and Element Plus controls on #1f2023.
+.dark-panel {
+  color: #e6e7ea;
+  --el-text-color-primary: #e6e7ea;
+  --el-text-color-regular: #e6e7ea;
+  --el-text-color-secondary: #9a9ca3;
+  --el-text-color-placeholder: #6f7177;
+  --el-text-color-disabled: #6f7177;
+  --el-fill-color-blank: #2a2b2f;
+  --el-fill-color-light: #2f3035;
+  --el-fill-color: #2f3035;
+  --el-disabled-bg-color: #26272a;
+  --el-disabled-border-color: #303136;
+  --el-border-color: #3a3b40;
+  --el-border-color-light: #3a3b40;
+  --el-border-color-lighter: #303136;
+  --el-border-color-hover: #55565c;
+  --el-color-primary: #3b6ef5;
+  --el-color-primary-light-3: #6a8ff7;
+  --el-color-primary-light-5: #3b6ef5;
+  --el-color-primary-light-7: #2b3f6e;
+  --el-color-primary-light-8: #24345a;
+  --el-color-primary-light-9: #1f2a45;
+  --el-color-primary-dark-2: #2f58c4;
+  .panel-title { margin: 0 0 12px; font-size: 15px; font-weight: 600; text-transform: none; letter-spacing: 0; color: #e6e7ea; }
+  .hint { color: #9a9ca3; }
+  .el-form-item { margin-bottom: 8px; }
+  .el-form-item__label { color: #9a9ca3; font-size: 12px; }
+  .el-input__wrapper, .el-select__wrapper { box-shadow: none !important; background: #2a2b2f; border-radius: 6px; }
+  .el-input-number .el-input__wrapper { background: #16171a; }
+  .el-input__inner { color: #e6e7ea; font-variant-numeric: tabular-nums; }
+  .el-button--primary.is-plain { --el-button-bg-color: #3b6ef5; --el-button-text-color: #fff; --el-button-border-color: #3b6ef5;
+    --el-button-hover-bg-color: #5482f7; --el-button-hover-text-color: #fff; --el-button-hover-border-color: #5482f7; }
+  .el-input-number__decrease, .el-input-number__increase { background: #2f3035; color: #e6e7ea; border-color: #3a3b40; }
+}

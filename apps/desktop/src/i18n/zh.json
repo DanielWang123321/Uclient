@@ -31,33 +31,6 @@
     "hint": "工具+工件总质量，与 UFACTORY Studio 定义一致；末端模型只用于显示。",
     "apply": "应用"
   },
-  "status": {
-    "title": "状态",
-    "tcp": "TCP",
-    "flange": "法兰",
-    "reachable": "可达",
-    "solutions": "{n} 个解"
-  },
-  "jog": {
-    "title": "关节",
-    "joint": "关节",
-    "linear": "直线",
-    "target": "目标 TCP 位姿",
-    "solve": "求解 IK",
-    "solution": "解",
-    "frame": "位姿参考",
-    "home": "归零"
-  },
-  "torque": {
-    "title": "关节扭矩 (N·m / %)",
-    "total": "总计",
-    "arm": "本体",
-    "payload": "负载",
-    "exportCsv": "导出 CSV",
-    "assumption": "仅静态重力；不含摩擦、减速器效率和单机标定。",
-    "max": "最大扭矩",
-    "pct": "占最大扭矩 %"
-  },
   "view": {
     "reset": "重置视角",
     "base": "Base",
@@ -83,5 +56,28 @@
     "bio_gripper_g2": "BIO 机械爪 G2",
     "lite6_gripper": "Lite6 机械爪",
     "lite6_vacuum_gripper": "Lite6 真空吸头"
+  },
+  "motion": {
+    "speed": "速度",
+    "home": "回零",
+    "align": "对齐",
+    "collapse": "收起 / 展开",
+    "errTitle": "运动已停止",
+    "errLimit": "已到达关节限位。",
+    "errJointLimit": "J{j} 已到达关节限位。",
+    "errUnreachable": "目标不可达（超出工作空间、接近奇异点或关节限位）。",
+    "errAlign": "从当前姿态只转动最后三个关节，无法让末端朝下。"
+  },
+  "info": {
+    "state": "状态",
+    "payload": "负载",
+    "tcp": "TCP 位置",
+    "joints": "关节角度",
+    "moving": "运动中",
+    "ready": "就绪",
+    "stopped": "已停止",
+    "mode": "模式",
+    "position": "位置",
+    "readOnly": "只读"
   }
 }

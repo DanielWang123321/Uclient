@@ -31,33 +31,6 @@
     "hint": "Total tool + workpiece mass, same as UFACTORY Studio. End-effector models are visual only.",
     "apply": "Apply"
   },
-  "status": {
-    "title": "Status",
-    "tcp": "TCP",
-    "flange": "Flange",
-    "reachable": "Reachable",
-    "solutions": "{n} solutions"
-  },
-  "jog": {
-    "title": "Joints",
-    "joint": "Joint",
-    "linear": "Linear",
-    "target": "Target TCP pose",
-    "solve": "Solve IK",
-    "solution": "Solution",
-    "frame": "Pose frame",
-    "home": "Zero"
-  },
-  "torque": {
-    "title": "Joint torque (N·m / %)",
-    "total": "Total",
-    "arm": "Arm",
-    "payload": "Payload",
-    "exportCsv": "Export CSV",
-    "assumption": "Static gravity only; no friction, gearbox efficiency or per-unit calibration.",
-    "max": "Max torque",
-    "pct": "% of max torque"
-  },
   "view": {
     "reset": "Reset view",
     "base": "Base",
@@ -83,5 +56,28 @@
     "bio_gripper_g2": "BIO Gripper G2",
     "lite6_gripper": "Lite6 Gripper",
     "lite6_vacuum_gripper": "Lite6 Vacuum Gripper"
+  },
+  "motion": {
+    "speed": "Speed",
+    "home": "Home",
+    "align": "Align",
+    "collapse": "Collapse / expand",
+    "errTitle": "Motion stopped",
+    "errLimit": "Joint limit reached.",
+    "errJointLimit": "J{j} reached its joint limit.",
+    "errUnreachable": "Target unreachable (workspace boundary, singularity or joint limit).",
+    "errAlign": "Cannot point the tool straight down by moving only the last three joints from this pose."
+  },
+  "info": {
+    "state": "State",
+    "payload": "Payload",
+    "tcp": "TCP Position",
+    "joints": "Joint Angle",
+    "moving": "Moving",
+    "ready": "Ready",
+    "stopped": "Stopped",
+    "mode": "Mode",
+    "position": "Position",
+    "readOnly": "read-only"
   }
 }

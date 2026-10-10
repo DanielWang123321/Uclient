@@ -356,6 +356,66 @@
           "target_pose"
         ]
       }
+    },
+    "motion.jog_tcp": {
+      "description": "Simulation only. One base-frame TCP increment from q_deg (nearest IK). Returns {q_deg, tcp_pose}. Errors 3001 unreachable / large joint jump, 3003 joint limit.",
+      "params": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string"
+          },
+          "q_deg": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "joint angles in degrees, length = dof"
+          },
+          "axis": {
+            "enum": [
+              "x",
+              "y",
+              "z",
+              "roll",
+              "pitch",
+              "yaw"
+            ]
+          },
+          "delta": {
+            "type": "number",
+            "description": "mm for x/y/z, deg for roll/pitch/yaw (rotation about the base axis)"
+          }
+        },
+        "required": [
+          "session_id",
+          "q_deg",
+          "axis",
+          "delta"
+        ]
+      }
+    },
+    "motion.align": {
+      "description": "Simulation only. Move only the last three joints so the tool z-axis points straight down (roll 180, pitch 0, current yaw); TCP position may change. Returns {q_deg, tcp_pose}. Error 3001 if unreachable.",
+      "params": {
+        "type": "object",
+        "properties": {
+          "session_id": {
+            "type": "string"
+          },
+          "q_deg": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "description": "joint angles in degrees, length = dof"
+          }
+        },
+        "required": [
+          "session_id",
+          "q_deg"
+        ]
+      }
     }
   },
   "errors": {

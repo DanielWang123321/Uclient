@@ -4,7 +4,9 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import URDFLoader, { type URDFRobot } from 'urdf-loader'
 
-export const ASSET_BASE = 'robot-assets/'
+export /** Camera distance factor for the robot framing (smaller = closer). */
+const VIEW_FIT = 1.6
+const ASSET_BASE = 'robot-assets/'
 
 function eulerXYZ(rpyDeg: number[]): THREE.Euler {
   // Fixed-axis X-Y-Z RPY (R = Rz·Ry·Rx) equals three.js intrinsic 'ZYX' order.
@@ -42,7 +44,8 @@ export class SceneController {
     this.renderer.outputColorSpace = THREE.SRGBColorSpace
     host.appendChild(this.renderer.domElement)
 
-    this.scene.background = new THREE.Color(0x2b2f36)
+    this.scene.background = new THREE.Color(0xf7f8f9) // light scene as in the v8 mockup
+    this.scene.fog = new THREE.Fog(0xf7f8f9, 3, 10)
     this.camera = new THREE.PerspectiveCamera(45, 1, 0.01, 50)
     this.camera.up.set(0, 0, 1)
     this.resetView()
@@ -51,11 +54,11 @@ export class SceneController {
     this.controls.addEventListener('change', () => this.requestRender())
     this.controls.update()
 
-    this.scene.add(new THREE.HemisphereLight(0xffffff, 0x445566, 2.2))
+    this.scene.add(new THREE.HemisphereLight(0xffffff, 0x8a96a8, 2.4))
     const sun = new THREE.DirectionalLight(0xffffff, 2.0)
     sun.position.set(2, -2, 4)
     this.scene.add(sun)
-    const grid = new THREE.GridHelper(4, 40, 0x5a6270, 0x3a404a)
+    const grid = new THREE.GridHelper(8, 80, 0xd5d8dd, 0xe3e5e9)
     grid.rotation.x = Math.PI / 2
     this.scene.add(grid)
     this.scene.add(this.baseAxes)
@@ -70,10 +73,21 @@ export class SceneController {
     this.resize()
   }
 
+  /** Default view; once a robot is loaded it is framed to fill the free scene area. */
   resetView() {
-    this.camera.position.set(1.9, -1.6, 1.3)
-    this.camera.lookAt(0.3, 0, 0.35)
-    this.controls?.target.set(0.3, 0, 0.35)
+    let target = new THREE.Vector3(0.3, 0, 0.35)
+    let pos = new THREE.Vector3(1.9, -1.6, 1.3)
+    if (this.robot && this.reach > 0) {
+      // Frame the whole reachable envelope (pose independent), not the current pose.
+      const sphere = new THREE.Sphere(new THREE.Vector3(0.1 * this.reach, 0, 0.45 * this.reach), 0.62 * this.reach)
+      target = sphere.center.clone()
+      const dir = new THREE.Vector3(0.45, 1.0, 0.42).normalize()
+      const fov = THREE.MathUtils.degToRad(this.camera.fov)
+      pos = target.clone().addScaledVector(dir, (sphere.radius / Math.sin(fov / 2)) * VIEW_FIT)
+    }
+    this.camera.position.copy(pos)
+    this.camera.lookAt(target)
+    this.controls?.target.copy(target)
     this.controls?.update()
     this.requestRender()
   }
@@ -109,6 +123,8 @@ export class SceneController {
       if (!robot || seq !== this.loadSeq) return
       this.robot = robot
       this.scene.add(robot)
+      this.reach = Object.values(robot.joints).reduce((a, j) => a + j.position.length(), 0)
+      this.resetView()
       const ee = robot.links[this.eeLink]
       if (ee) {
         ee.add(this.tcpAxes)
@@ -179,6 +195,15 @@ export class SceneController {
     })
   }
 
+  /** Screen-space insets (px) covered by floating panels; the view is centred in the free area. */
+  /** Sum of joint offsets = an upper bound of the arm's reach (m). */
+  private reach = 0
+  private insets = { left: 0, right: 0, top: 0, bottom: 0 }
+  setInsets(i: { left: number; right: number; top: number; bottom: number }) {
+    this.insets = { ...i }
+    this.resize()
+  }
+
   private resize() {
     const w = this.host.clientWidth || 1
     const h = this.host.clientHeight || 1
@@ -186,6 +211,11 @@ export class SceneController {
     this.renderer.domElement.style.width = '100%'
     this.renderer.domElement.style.height = '100%'
     this.camera.aspect = w / h
+    const { left, right, top, bottom } = this.insets
+    const dx = (right - left) / 2
+    const dy = (bottom - top) / 2
+    if (dx || dy) this.camera.setViewOffset(w, h, dx, dy, w, h)
+    else this.camera.clearViewOffset()
     this.camera.updateProjectionMatrix()
     this.requestRender()
   }

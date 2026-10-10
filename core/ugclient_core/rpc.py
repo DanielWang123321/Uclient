@@ -9,7 +9,7 @@ from collections.abc import Callable
 from typing import Any
 
 from . import API_VERSION, __version__
-from .api import dyn, kin, robot
+from .api import dyn, kin, motion, robot
 from .backend import factory
 from .errors import (
     API_VERSION_MISMATCH,
@@ -39,6 +39,8 @@ METHODS: dict[str, Handler] = {
     "dyn.rnea": dyn.rnea,
     "dyn.mass_matrix": dyn.mass_matrix,
     "check.pose": dyn.check_pose,
+    "motion.jog_tcp": motion.jog_tcp,
+    "motion.align": motion.align,
 }
 
 

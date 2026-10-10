@@ -12,7 +12,7 @@ async function onEe(ee: string) {
 <template>
   <div>
     <div class="panel-title">{{ $t('robot.title') }}</div>
-    <el-form label-position="left" label-width="72px" size="small">
+    <el-form label-position="left" label-width="96px" size="small">
       <el-form-item :label="$t('robot.model')">
         <el-select :model-value="robot.key" data-test="robot-select" @update:model-value="onModel">
           <el-option v-for="r in robot.robots" :key="r.key" :label="r.key" :value="r.key" />
