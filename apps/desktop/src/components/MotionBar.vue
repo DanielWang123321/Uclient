@@ -22,23 +22,27 @@ const fmtLim = (v: number) => String(Math.round(v * 10) / 10)
 // One PressHold per button/segment; pointer capture keeps release on the same control.
 const holders = new Map<string, PressHold>()
 const pressed = ref('')
-function holder(id: string, t: JogTarget, dir: 1 | -1) {
+type Cbs = { onClick: () => void; onHoldStart: () => void }
+function holder(id: string, cbs: Cbs) {
   let h = holders.get(id)
   if (!h) {
-    h = new PressHold({
-      onClick: () => motion.step(t, dir),
-      onHoldStart: () => motion.startContinuous(t, dir),
-      onHoldEnd: () => motion.stop(),
-    })
+    h = new PressHold({ ...cbs, onHoldEnd: () => motion.stop() })
     holders.set(id, h)
   }
   return h
 }
-function down(e: PointerEvent, id: string, t: JogTarget, dir: 1 | -1) {
+function press(e: PointerEvent, id: string, cbs: Cbs) {
   if (e.button !== 0) return
   ;(e.currentTarget as Element).setPointerCapture?.(e.pointerId)
   pressed.value = id
-  holder(id, t, dir).press()
+  holder(id, cbs).press()
+}
+function down(e: PointerEvent, id: string, t: JogTarget, dir: 1 | -1) {
+  press(e, id, { onClick: () => motion.step(t, dir), onHoldStart: () => motion.startContinuous(t, dir) })
+}
+// Home / Align: click = one joint-space step toward the target, hold = continuous until release.
+function goDown(e: PointerEvent, kind: 'home' | 'align') {
+  press(e, kind, { onClick: () => motion.goStep(kind), onHoldStart: () => motion.goStart(kind) })
 }
 function up(id: string) {
   if (pressed.value === id) pressed.value = ''
@@ -94,8 +98,12 @@ onBeforeUnmount(() => motion.stop())
       <el-slider v-model="motion.speed" class="speed" :min="1" :max="100" :show-tooltip="false" data-test="speed" />
       <span class="pctv num">{{ motion.speed }}%</span>
       <span class="gap" />
-      <button class="btn" :disabled="busy" data-test="home" @click="motion.home()">{{ $t('motion.home') }}</button>
-      <button class="btn" :disabled="busy" data-test="align" @click="motion.align()">{{ $t('motion.align') }}</button>
+      <button
+        v-for="k in (['home', 'align'] as const)" :key="k" class="btn" :class="{ on: pressed === k }" :disabled="busy" :data-test="k"
+        @pointerdown="goDown($event, k)" @pointerup="up(k)" @pointercancel="cancel(k)" @lostpointercapture="up(k)"
+      >
+        {{ $t(`motion.${k}`) }}
+      </button>
     </div>
     <div v-show="open" class="halves">
       <div class="half joints">
@@ -174,6 +182,8 @@ button:disabled { opacity: .5; cursor: default; }
 .gap { width: 14px; }
 .btn { background: #2a2b2f; border-radius: 6px; padding: 6px 14px; font-size: 13px; }
 .btn:hover:not(:disabled) { background: #34353a; }
+.btn.on { background: #3b6ef5; }
+.btn { touch-action: none; }
 .half { flex: 1; min-width: 0; }
 .half + .half { border-left: 1px solid #303136; }
 .joints { flex: .95; display: flex; flex-direction: column; justify-content: space-evenly; padding: 4px 16px; }

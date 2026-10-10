@@ -122,20 +122,43 @@ export const useMotionStore = defineStore('motion', () => {
     }
   }
 
-  async function home() {
-    if (!robot.sessionId) return
-    await moveTo(robot.q.map(() => 0))
-  }
+  type GoTarget = 'home' | 'align'
 
-  async function align() {
-    if (!robot.sessionId) return
+  /** Joint target for Home (all zeros) or Align (sidecar). Shows the error and returns null if unreachable. */
+  async function resolveTarget(kind: GoTarget): Promise<number[] | null> {
+    if (kind === 'home') return robot.q.map(() => 0)
     try {
       const r = await engine.call<JogResult>('motion.align', { session_id: robot.sessionId, q_deg: [...robot.q] })
-      await moveTo(r.q_deg)
+      return r.q_deg
     } catch (e) {
       await fail(e instanceof RpcError && e.code === IK_UNREACHABLE ? new MotionError(i18n.global.t('motion.errAlign')) : e)
+      return null
     }
   }
+
+  /** Click on Home / Align: one joint-space step (at most stepDeg per joint) toward the target, then state 4. */
+  async function goStep(kind: GoTarget) {
+    if (!robot.sessionId) return
+    const my = ++token
+    const target = await resolveTarget(kind)
+    if (!target || my !== token) return
+    state.value = STATE.moving
+    active.value = null
+    await robot.setQ(approach(robot.q, target, MOTION.stepDeg).q)
+    if (my === token) stop()
+  }
+
+  /** Hold on Home / Align: move continuously toward the target at joint speed until release (stop) or arrival. */
+  async function goStart(kind: GoTarget) {
+    if (!robot.sessionId) return
+    const my = ++token
+    const target = await resolveTarget(kind)
+    if (!target || my !== token) return // released while the target was being computed
+    await moveTo(target)
+  }
+
+  const home = () => goStart('home')
+  const align = () => goStart('align')
 
   /** Release / STOP: cancel any motion and enter state 4. */
   function stop() {
@@ -144,5 +167,5 @@ export const useMotionStore = defineStore('motion', () => {
     state.value = STATE.stopped
   }
 
-  return { speed, state, active, step, startContinuous, home, align, stop, moveTo }
+  return { speed, state, active, step, startContinuous, goStep, goStart, home, align, stop, moveTo }
 })
