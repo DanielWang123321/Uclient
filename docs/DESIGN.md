@@ -56,7 +56,7 @@ q = `[0, −86.401, −144.409, −180, 58.007, −180]°`，τ ≈ J2 74.958 N�
 | 模块 | MVP（v0.1） | v0.2 | 后续 |
 |---|---|---|---|
 | 机型 | uf850 / xarm5/6/7 / lite6（来自 `ufactory.robots.registry.ROBOT_PROFILES`）| 末端：G2、Bio G2、Lite6 Gripper/Vacuum 的外观 | 安装方式（壁挂/倒装 → 改重力向量）|
-| TCP | TCP Offset `[x,y,z,r,p,y]`（mm/°，相对法兰）| 末端默认 TCP 取自 ufactory_genesis 组合 URDF 的 tcp 关节（G2 172 mm、Lite6 夹爪 83.6 mm、BIO G2 [159.5, 0, 59.5, 0, 0, 0]（维护者提供的 UFACTORY 官方值，Uclient 内常量 `OFFICIAL_TCP_OFFSETS`）、Lite6 吸头 0）| 5 点标定导入 |
+| TCP | TCP Offset `[x,y,z,r,p,y]`（mm/°，相对法兰）| 末端默认 TCP 取自 ufactory_genesis 组合 URDF 的 tcp 关节（G2 172 mm、Lite6 夹爪 83.6 mm、BIO G2 [159.5, 0, 59.5, 0, 0, 0]（维护者提供的 UFACTORY 官方值，Uclient 内常量 `OFFICIAL_TCP_OFFSETS`）、Lite6 吸头 [0, 0, 61.1, 0, 0, 0]（官方值，同为 `OFFICIAL_TCP_OFFSETS` 常量））| 5 点标定导入 |
 | 负载 | mass + COM（与 Studio 完全一致：工具+工件总质量，COM 相对法兰）| 惯量张量（可选）| 负载辨识数据导入 |
 | 关节点动 | 滑块 + 数值输入，限位显示 | 键盘步进 | — |
 | 笛卡尔点动 | 基坐标系 / 工具坐标系 XYZ RPY 步进（走 IK）| 3D 拖拽 TCP gizmo | — |

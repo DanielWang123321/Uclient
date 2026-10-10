@@ -107,8 +107,11 @@ def test_end_effector_combinations_and_default_tcp(client):
             assert s["end_effector"] == ee
             off = s["default_tcp_offset"]
             assert len(off) == 6
-            if ee == "none" or ee == "lite6_vacuum_gripper":
+            if ee == "none":
                 assert off == [0.0] * 6
+            elif ee == "lite6_vacuum_gripper":
+                assert s["default_tcp_source"] == "official"
+                assert off == [0.0, 0.0, 61.1, 0.0, 0.0, 0.0]
             elif ee in ("gripper_g2", "lite6_gripper"):
                 assert s["default_tcp_source"].endswith("#joint_tcp")
                 assert off == pytest.approx([0, 0, 172.0 if ee == "gripper_g2" else 83.6, 0, 0, 0])
@@ -165,3 +168,12 @@ def test_bio_g2_default_tcp_is_official_constant(client):
         s = client.call("robot.info", robot=robot, end_effector="bio_gripper_g2")
         assert s["default_tcp_offset"] == [159.5, 0.0, 59.5, 0.0, 0.0, 0.0]
         assert s["default_tcp_source"] == "official"
+
+
+def test_lite6_vacuum_default_tcp_is_official_constant(client):
+    from uclient_core.backend.catalog_ufg import OFFICIAL_TCP_OFFSETS
+
+    assert OFFICIAL_TCP_OFFSETS["lite6_vacuum_gripper"] == (0.0, 0.0, 61.1, 0.0, 0.0, 0.0)
+    s = client.call("robot.info", robot="lite6", end_effector="lite6_vacuum_gripper")
+    assert s["default_tcp_offset"] == [0.0, 0.0, 61.1, 0.0, 0.0, 0.0]
+    assert s["default_tcp_source"] == "official"
