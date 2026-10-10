@@ -167,7 +167,7 @@ flowchart LR
 ```json
 {
   "schema_version": 1,
-  "app": {"name": "UGClient", "version": "0.1.0"},
+  "app": {"name": "UGClient", "version": "0.1.1"},
   "core": {"ufactory_genesis_commit": "be49519", "pinocchio": "4.0.0"},
   "robot": {"key": "uf850", "end_effector": "none", "calibration": null,
             "mounting": {"gravity_dir": [0, 0, -1]}},
@@ -215,7 +215,7 @@ Studio 的 Live Control 页：中间 3D 视图（Reset Perspective、Base/TCP �
 │ TCP 830,0,200 │                                          │ J3 ████ -30.6 34% │
 │ 可达 ✔ 8 解   │                                          │ ...  [导出 CSV]   │
 ├───────────────┴──────────────────────────────────────────┴───────────────────┤
-│ 引擎 ● 已连接 core 0.1.0 / ufactory_genesis be49519 / pinocchio 4.0.0   日志 ▴│
+│ 引擎 ● 已连接 core 0.1.1 / ufactory_genesis be49519 / pinocchio 4.0.0   日志 ▴│
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 ### 7.2 轨迹页

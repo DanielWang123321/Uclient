@@ -44,7 +44,7 @@ export class RpcClient {
     const hello = await this.call<HelloResult>('system.hello', {
       token,
       api_version: CLIENT_API_VERSION,
-      client_version: '0.1.0',
+      client_version: '0.1.1',
     })
     if (hello.api_version.split('.')[0] !== CLIENT_API_VERSION.split('.')[0]) {
       this.close()
