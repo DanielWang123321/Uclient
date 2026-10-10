@@ -32,10 +32,8 @@ export function newProject(): ProjectFile {
     app: { name: 'Uclient', version: '0.1.0' },
     core: { ufactory_genesis_commit: '60fe926', pinocchio: '4.0.0' },
     robot: { key: 'uf850', end_effector: 'none', calibration: null, mounting: { gravity_dir: [0, 0, -1] } },
-    tcp_presets: [
-      { id: 'flange', name: 'Flange', offset: [0, 0, 0, 0, 0, 0] },
-      { id: 'g2', name: 'Gripper G2', offset: [0, 0, 101.1, 0, 0, 0] },
-    ],
+    // Tool TCPs come from the sidecar (URDF tcp joint of the mounted end effector), not from here.
+    tcp_presets: [{ id: 'flange', name: 'Flange', offset: [0, 0, 0, 0, 0, 0] }],
     payload_presets: [{ id: 'p3kg', name: '3kg box', mass_kg: 3.0, com_mm: [0, 0, 35], inertia_kgm2: null }],
     active: { tcp: 'flange', payload: 'p3kg' },
     poses: [{ id: 'case-850-a', name: '850 far reach', tcp_pose: [830, 0, 200, -180, 0, 0] }],
@@ -57,5 +55,14 @@ export function migrate(raw: unknown): ProjectFile {
     p = MIGRATIONS[v](p)
     v += 1
   }
-  return p as unknown as ProjectFile
+  return dropStaleG2Preset(p as unknown as ProjectFile)
+}
+
+/** v0.1.0 shipped a 'g2' preset of z = 101.1 mm, which is a grasp-planning offset, not the G2 TCP. */
+function dropStaleG2Preset(p: ProjectFile): ProjectFile {
+  const stale = (t: TcpPreset) => t.id === 'g2' && t.offset.join(',') === '0,0,101.1,0,0,0'
+  if (!p.tcp_presets?.some(stale)) return p
+  const tcp_presets = p.tcp_presets.filter((t) => !stale(t))
+  const active = p.active?.tcp === 'g2' ? { ...p.active, tcp: 'flange' } : p.active
+  return { ...p, tcp_presets, active }
 }

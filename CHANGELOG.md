@@ -2,6 +2,12 @@
 
 All notable changes to Uclient are documented here. Format: [Keep a Changelog](https://keepachangelog.com/), versioning: SemVer.
 
+## [Unreleased]
+
+### Fixed
+- End effectors (Gripper G2, BIO Gripper G2, Lite6 gripper / vacuum gripper) could not be added: their GLB meshes were not bundled.
+- Mounting an end effector now sets its default TCP from the ufactory_genesis URDF tcp joint (G2 z 172 mm, Lite6 gripper z 83.6 mm, BIO G2 per URDF, Lite6 vacuum 0). The v0.1.0 "Gripper G2" preset of 101.1 mm was a grasp-planning offset, not the TCP, and is removed from projects on load.
+
 ## [0.1.0] - 2026-10-10
 
 First development release. Uclient is a personal project, not an official UFACTORY product.

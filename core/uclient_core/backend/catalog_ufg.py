@@ -84,7 +84,7 @@ class UfgCatalog:
             **dict(
                 zip(
                     ("default_tcp_offset", "default_tcp_source"),
-                    _default_tcp(cfg, end_effector, visual, profile.ee_link),
+                    _default_tcp(end_effector, visual, profile.ee_link),
                     strict=True,
                 )
             ),
@@ -94,24 +94,22 @@ class UfgCatalog:
         return {"ufactory_genesis_version": _ufg_version(), "ufactory_genesis_commit": _ufg_commit()}
 
 
-#: End effectors whose tool-tip offset comes from the upstream runtime config (gripper.adapter must match).
-_RUNTIME_TCP = {"gripper_g2": "g2", "lite6_gripper": "lite6"}
 #: TCP frames defined in the upstream combo URDFs.
 _URDF_TCP_FRAMES = ("bio_gripper_g2_tcp_link", "link_tcp")
 
 
-def _default_tcp(cfg, end_effector: str, visual_urdf: Path, ee_link: str) -> tuple[tuple[float, ...], str]:
-    """Default TCP offset for an end effector, read from ufactory_genesis (never hard-coded).
+def _default_tcp(end_effector: str, visual_urdf: Path, ee_link: str) -> tuple[tuple[float, ...], str]:
+    """Default TCP offset of an end effector, read at runtime from the ufactory_genesis combo URDF.
 
-    G2 / Lite6 gripper: ``gripper.tool_tip_offset_z_m`` of the runtime config (e.g. 101.1 mm for G2).
-    Otherwise: the TCP frame of the combo visual URDF relative to the flange, if any (Bio G2).
-    Lite6 vacuum gripper: upstream defines no TCP, so the flange (zero offset) is used.
+    The TCP is the URDF tcp frame (``link_tcp`` for G2 / Lite6 gripper, ``bio_gripper_g2_tcp_link``
+    for BIO G2) expressed in the flange frame. ``gripper.tool_tip_offset_z_m`` of the runtime config
+    is a grasp-planning offset, not the TCP, and is deliberately not used. Lite6 vacuum gripper:
+    upstream defines no TCP frame, so the flange (zero offset) is used.
     """
     if end_effector == "none":
         return (0.0,) * 6, "none"
-    adapter = _RUNTIME_TCP.get(end_effector)
-    if adapter is not None and getattr(cfg.gripper, "adapter", None) == adapter:
-        return (0.0, 0.0, round(float(cfg.gripper.tool_tip_offset_z_m) * 1000.0, 6), 0.0, 0.0, 0.0), "runtime_config"
+    import xml.etree.ElementTree as ET
+
     import numpy as np
     import pinocchio as pin
     from ufactory.kinematics.tcp_offset import matrix_to_rpy
@@ -124,7 +122,15 @@ def _default_tcp(cfg, end_effector: str, visual_urdf: Path, ee_link: str) -> tup
             T = data.oMf[model.getFrameId(ee_link)].actInv(data.oMf[model.getFrameId(name)])
             xyz = [round(float(v) * 1000.0, 3) for v in T.translation]
             rpy = [round(float(np.degrees(a)), 3) + 0.0 for a in matrix_to_rpy(T.rotation)]
-            return tuple(xyz + rpy), f"urdf:{name}"
+            joint = next(
+                (
+                    j.get("name")
+                    for j in ET.parse(visual_urdf).getroot().iter("joint")
+                    if j.find("child") is not None and j.find("child").get("link") == name
+                ),
+                name,
+            )
+            return tuple(xyz + rpy), f"urdf:{visual_urdf.name}#{joint}"
     return (0.0,) * 6, "none"
 
 

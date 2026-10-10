@@ -10,3 +10,14 @@ describe('end-effector labels', () => {
     }
   })
 })
+
+import { migrate, newProject } from '../src/project/migrate'
+describe('stale G2 preset', () => {
+  it('drops the v0.1.0 101.1 mm G2 preset (not a TCP)', () => {
+    const old = { ...newProject(), tcp_presets: [...newProject().tcp_presets, { id: 'g2', name: 'Gripper G2', offset: [0, 0, 101.1, 0, 0, 0] }], active: { tcp: 'g2', payload: 'p3kg' } }
+    const p = migrate(old)
+    expect(p.tcp_presets.map((t) => t.id)).toEqual(['flange'])
+    expect(p.active.tcp).toBe('flange')
+    expect(JSON.stringify(newProject())).not.toContain('101.1')
+  })
+})

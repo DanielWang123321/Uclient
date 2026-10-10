@@ -8,6 +8,7 @@
 
 | 版本 | 日期 | 变更 |
 |---|---|---|
+| v0.3.2 | 2026-10-10 | 末端默认 TCP 改为 URDF tcp 关节（G2 172 mm，Lite6 夹爪 83.6 mm）；`tool_tip_offset_z_m` 不是 TCP。 |
 | v0.3.1 | 2026-10-10 | Linux 只打 deb 包，取消 AppImage（用户决定）；CI/发布流程、README 同步更新。 |
 | v0.3 | 2026-10-10 | 资源 `assets/urdf` 按 `ufactory_genesis` NOTICE 署名直接随包分发，不再单独核验；v0.1 只打 Linux 包（ubuntu-22.04：AppImage + deb），Windows 10+ 打包移到后续里程碑，代码保持跨平台；额定扭矩运行时从 `ufactory_genesis` 读取、不在本地硬编码，并锁定即将发布的官方额定值版本；xArm 系列只支持 `_1305`；所有待确认问题已关闭。 |
 | v0.2 | 2026-10-10 | 确认个人仓库 `DanielWang123321/Uclient`，README 必须声明“个人项目、非 UFACTORY 官方产品”；校核输入位姿默认 TCP（已叠加 TCP Offset）；负载定义与 UFACTORY Studio 完全一致；前端由 Svelte 5 改为 Vue 3 + TypeScript + Vite + Element Plus，曲线库选 uPlot；暂不修改 `ufactory_genesis`，负载感知的重力/RNEA、纯 Pinocchio IK、FK/Jacobian 都在 sidecar 中实现，经适配层 `backend/` 隔离，上游有接口后再切换；平台收窄为 Linux + Windows 10+，移除 macOS 构建和签名公证；更新待确认问题。 |
@@ -48,14 +49,14 @@
 | U6 | 配置比较 | 2~N 套负载/TCP 配置 | 同一位姿下扭矩对比表 |
 
 U1 已在盒子里验证过（脚本 `/home/box/dev/ufactory_genesis_calc/calc_uf850_torque.py`，当时 TCP Offset = 0，即 TCP 与法兰重合，所以这组数对应“TCP Offset 为零”的 TCP 输入）：
-q = `[0, −86.401, −144.409, −180, 58.007, −180]°`，τ ≈ J2 74.958 N·m，J3 −30.634 N·m，J4 −0.662 N·m，其余 ≈ 0；负载部分（J2 24.427、J3 −12.972）与 `Jᵀ·F` 独立核对一致（误差 < 0.001 N·m）。按当前仓库的 `effort_limits_nm` 折算为 J2 37.5%、J3 34.0%；**这两个百分比会随 `ufactory_genesis` 即将发布的官方额定扭矩而变化**，扭矩绝对值不变。这组数会直接成为测试金标准（§11）。若用户设了非零 TCP Offset（例如 G2 的 101.1 mm），同一个 TCP 位姿对应的法兰位置会变，扭矩也随之变化，这是预期行为。
+q = `[0, −86.401, −144.409, −180, 58.007, −180]°`，τ ≈ J2 74.958 N·m，J3 −30.634 N·m，J4 −0.662 N·m，其余 ≈ 0；负载部分（J2 24.427、J3 −12.972）与 `Jᵀ·F` 独立核对一致（误差 < 0.001 N·m）。按当前仓库的 `effort_limits_nm` 折算为 J2 37.5%、J3 34.0%；**这两个百分比会随 `ufactory_genesis` 即将发布的官方额定扭矩而变化**，扭矩绝对值不变。这组数会直接成为测试金标准（§11）。若用户设了非零 TCP Offset（例如 G2 的 172 mm），同一个 TCP 位姿对应的法兰位置会变，扭矩也随之变化，这是预期行为。
 
 ## 3. 功能清单（MVP vs 后续）
 
 | 模块 | MVP（v0.1） | v0.2 | 后续 |
 |---|---|---|---|
 | 机型 | uf850 / xarm5/6/7 / lite6（来自 `ufactory.robots.registry.ROBOT_PROFILES`）| 末端：G2、Bio G2、Lite6 Gripper/Vacuum 的外观 | 安装方式（壁挂/倒装 → 改重力向量）|
-| TCP | TCP Offset `[x,y,z,r,p,y]`（mm/°，相对法兰）| TCP 预设库（G2=101.1 mm 等）| 5 点标定导入 |
+| TCP | TCP Offset `[x,y,z,r,p,y]`（mm/°，相对法兰）| 末端默认 TCP 取自 ufactory_genesis 组合 URDF 的 tcp 关节（G2 172 mm、Lite6 夹爪 83.6 mm、BIO G2 按 URDF、Lite6 吸头 0）| 5 点标定导入 |
 | 负载 | mass + COM（与 Studio 完全一致：工具+工件总质量，COM 相对法兰）| 惯量张量（可选）| 负载辨识数据导入 |
 | 关节点动 | 滑块 + 数值输入，限位显示 | 键盘步进 | — |
 | 笛卡尔点动 | 基坐标系 / 工具坐标系 XYZ RPY 步进（走 IK）| 3D 拖拽 TCP gizmo | — |
@@ -169,7 +170,7 @@ flowchart LR
   "robot": {"key": "uf850", "end_effector": "none", "calibration": null,
             "mounting": {"gravity_dir": [0, 0, -1]}},
   "tcp_presets":     [{"id": "flange", "name": "Flange", "offset": [0,0,0,0,0,0]},
-                      {"id": "g2",     "name": "Gripper G2", "offset": [0,0,101.1,0,0,0]}],
+                      ],  // 末端默认 TCP 由 sidecar 按 URDF tcp 关节下发，不写入项目
   "payload_presets": [{"id": "p3kg", "name": "3kg box", "mass_kg": 3.0, "com_mm": [0,0,35], "inertia_kgm2": null}],
   "active": {"tcp": "flange", "payload": "p3kg"},
   "poses": [{"id": "case-850-a", "name": "850 远端", "tcp_pose": [830,0,200,-180,0,0],
@@ -290,7 +291,7 @@ backend/
 
 ## 11. 测试策略
 
-- **金标准（golden）**：`tests/golden/uf850_case_a.json`，存 U1 的输入（TCP 位姿、TCP Offset=0、负载 3 kg / COM `[0,0,35]` mm 相对法兰）和期望值（q、τ 总/本体/负载；利用率百分比不写死，而是用运行时读到的 `effort_limits_nm` 计算后断言），容差：τ 1e-3 N·m，q 1e-3°。再加一条 TCP Offset=`[0,0,101.1,0,0,0]` 的用例，验证“TCP 输入 → 法兰”换算方向正确。再补每个机型至少 2 个位姿（home、伸展）的重力扭矩，用独立实现生成。
+- **金标准（golden）**：`tests/golden/uf850_case_a.json`，存 U1 的输入（TCP 位姿、TCP Offset=0、负载 3 kg / COM `[0,0,35]` mm 相对法兰）和期望值（q、τ 总/本体/负载；利用率百分比不写死，而是用运行时读到的 `effort_limits_nm` 计算后断言），容差：τ 1e-3 N·m，q 1e-3°。再加一条 TCP Offset=`[0,0,172,0,0,0]`（G2 的 URDF tcp）的用例，验证“TCP 输入 → 法兰”换算方向正确。再补每个机型至少 2 个位姿（home、伸展）的重力扭矩，用独立实现生成。
 - **交叉验证**：
   - 负载部分：`τ_payload == Jᵀ(q)·[0,0,−m g, (r×F)]`（与 `appendBody` 两种方法比较）。
   - 动力学：`rnea(q,0,0) == gravity(q)`；`rnea(q,qd,qdd) == M qdd + C qd + g`（随机 q）。
@@ -387,3 +388,5 @@ Uclient/
 | ✔11 | 机型范围 | xArm 系列只支持 `_1305`，不支持旧版本；另含 UF850、Lite6（§1）|
 
 **待确认问题：无。** 所有问题均已关闭。唯一的外部依赖是 `ufactory_genesis` 带官方额定扭矩的版本发布，发布后把 tag 告诉我即可锁定（不影响 M0–M2 开发）。
+
+> 注：`gripper.tool_tip_offset_z_m`（G2 0.1011 m、Lite6 0.0543 m）是 ufactory_genesis 抓取规划用的 link6→手指中间偏移，**不是 TCP**，Uclient 不使用它。

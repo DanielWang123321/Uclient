@@ -14,7 +14,7 @@ const LOAD = {
 }
 const EE_TCP: Record<string, number[]> = {
   none: [0, 0, 0, 0, 0, 0],
-  gripper_g2: [0, 0, 101.1, 0, 0, 0],
+  gripper_g2: [0, 0, 172, 0, 0, 0],
   bio_gripper_g2: [159.657, 0, 55, 0, 0, 0],
 }
 const GOLDEN_Q = [0, -86.401, -144.409, -180, 58.007, -180]
@@ -74,11 +74,11 @@ describe('robot store', () => {
     await robot.setQ([0, -86.401, -144.409, -180, 58.007, -180])
     expect(await robot.select('uf850', 'gripper_g2')).toBe(true)
     expect(robot.endEffector).toBe('gripper_g2')
-    expect(robot.tcpOffset).toEqual([0, 0, 101.1, 0, 0, 0])
+    expect(robot.tcpOffset).toEqual([0, 0, 172, 0, 0, 0])
     expect(robot.payload).toEqual({ mass_kg: 3, com_mm: [0, 0, 35] })
     expect(robot.q[1]).toBeCloseTo(-86.401) // same arm: pose kept
     const tcpCall = ws.sent.filter((m) => m.method === 'tcp.set').pop()
-    expect(tcpCall?.params.offset).toEqual([0, 0, 101.1, 0, 0, 0])
+    expect(tcpCall?.params.offset).toEqual([0, 0, 172, 0, 0, 0])
     const plCall = ws.sent.filter((m) => m.method === 'payload.set').pop()
     expect(plCall?.params).toMatchObject({ mass_kg: 3, com_mm: [0, 0, 35] })
 

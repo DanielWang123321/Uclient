@@ -49,13 +49,13 @@ def test_check_pose_finds_golden_solution(client, golden):
 
 
 def test_tcp_offset_moves_flange(client, golden):
-    """TCP input -> flange conversion direction (G2-like 101.1 mm offset along tool z)."""
+    """TCP input -> flange conversion direction (G2 TCP: 172 mm along tool z)."""
     s = _load(client, golden)
-    client.call("tcp.set", session_id=s["session_id"], offset=[0, 0, 101.1, 0, 0, 0])
+    client.call("tcp.set", session_id=s["session_id"], offset=[0, 0, 172.0, 0, 0, 0])
     r = client.call("check.pose", session_id=s["session_id"], target_pose=golden["target_pose"])
     flange = r["solutions"][0]["flange_pose"]
-    # tool z points down (roll = -180), so the flange sits 101.1 mm above the TCP
-    np.testing.assert_allclose(flange[:3], [830, 0, 301.1], atol=1e-3)
+    # tool z points down (roll = -180), so the flange sits 172 mm above the TCP
+    np.testing.assert_allclose(flange[:3], [830, 0, 372.0], atol=1e-3)
 
 
 def test_payload_matches_jacobian_transpose(client, golden):
@@ -109,7 +109,7 @@ def test_tcp_frame_matches_upstream_pose_flange_to_tcp(client, key):
     s = client.call("robot.load", robot=key)
     sid = s["session_id"]
     q = [10.0, -20.0, -30.0, 15.0, 40.0, -25.0, 5.0][: s["dof"]]
-    for off in ([0, 0, 0, 0, 0, 0], [10, -5, 101.1, 5, -10, 30]):
+    for off in ([0, 0, 0, 0, 0, 0], [10, -5, 172.0, 5, -10, 30]):
         client.call("tcp.set", session_id=sid, offset=off)
         r = client.call("kin.fk", session_id=sid, q_deg=q)
         fl = np.array(r["flange_pose"])

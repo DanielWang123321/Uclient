@@ -25,7 +25,7 @@ class RobotInfo:
     end_effector: str = "none"
     #: Default TCP offset [x,y,z mm, r,p,y deg] for the mounted end effector (visual only, no mass).
     default_tcp_offset: tuple[float, ...] = (0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
-    #: Where the default TCP comes from: "none", "runtime_config" or "urdf:<frame>".
+    #: Where the default TCP comes from: "none" or "urdf:<urdf file>#<tcp joint>".
     default_tcp_source: str = "none"
 
 

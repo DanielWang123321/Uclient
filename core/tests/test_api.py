@@ -91,8 +91,6 @@ def test_schema_lists_every_method():
 def test_end_effector_combinations_and_default_tcp(client):
     """Every supported arm x end effector loads, has a default TCP read from ufactory_genesis, and the
     end effector is visual only (gravity torques do not change)."""
-    from ufactory.config.loader import load_runtime_config
-
     expected = {
         "uf850": {"none", "gripper_g2", "bio_gripper_g2"},
         "xarm5_1305": {"none", "gripper_g2", "bio_gripper_g2"},
@@ -102,7 +100,6 @@ def test_end_effector_combinations_and_default_tcp(client):
     }
     for r in client.call("robot.list"):
         assert set(r["end_effectors"]) == expected[r["key"]]
-        tool_tip_mm = load_runtime_config(r["key"]).gripper.tool_tip_offset_z_m * 1000.0
         q = [10.0, -30.0, -40.0, 20.0, 35.0, 0.0, 5.0][: r["dof"]]
         base = None
         for ee in r["end_effectors"]:
@@ -113,19 +110,23 @@ def test_end_effector_combinations_and_default_tcp(client):
             if ee == "none" or ee == "lite6_vacuum_gripper":
                 assert off == [0.0] * 6
             elif ee in ("gripper_g2", "lite6_gripper"):
-                assert s["default_tcp_source"] == "runtime_config"
-                assert off == pytest.approx([0, 0, tool_tip_mm, 0, 0, 0])
+                assert s["default_tcp_source"].endswith("#joint_tcp")
+                assert off == pytest.approx([0, 0, 172.0 if ee == "gripper_g2" else 83.6, 0, 0, 0])
             else:
-                assert s["default_tcp_source"] == "urdf:bio_gripper_g2_tcp_link"
+                assert s["default_tcp_source"].endswith("#bio_gripper_g2_tcp_joint")
                 assert np.linalg.norm(off[:3]) > 100
             tau = client.call("dyn.gravity", session_id=s["session_id"], q_deg=q)["tau_nm"]
             base = base or tau
             np.testing.assert_allclose(tau, base, atol=1e-12)  # end effector adds no mass
 
 
-def test_g2_default_offset_is_101_1_mm(client):
+def test_g2_default_tcp_is_urdf_tcp_172_mm(client):
+    """Regression: the default TCP is the URDF tcp joint, not ``tool_tip_offset_z_m`` (101.1 mm)."""
     s = client.call("robot.info", robot="uf850", end_effector="gripper_g2")
-    assert s["default_tcp_offset"] == pytest.approx([0, 0, 101.1, 0, 0, 0])
+    assert s["default_tcp_offset"] == pytest.approx([0, 0, 172.0, 0, 0, 0])
+    assert s["default_tcp_source"] == "urdf:uf850_g2_visual.urdf#joint_tcp"
+    s = client.call("robot.info", robot="lite6", end_effector="lite6_gripper")
+    assert s["default_tcp_offset"] == pytest.approx([0, 0, 83.6, 0, 0, 0])
 
 
 def test_synced_assets_cover_every_visual_urdf(tmp_path):
