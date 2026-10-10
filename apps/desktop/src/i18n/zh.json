@@ -37,7 +37,8 @@
     "tcp": "TCP",
     "com": "COM",
     "loading": "正在加载模型…",
-    "loadFailed": "模型加载失败"
+    "loadFailed": "模型加载失败",
+    "axes": "坐标轴：X 红、Y 绿、Z 蓝"
   },
   "engine": {
     "connected": "已连接",

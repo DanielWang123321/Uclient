@@ -37,7 +37,8 @@
     "tcp": "TCP",
     "com": "COM",
     "loading": "Loading model…",
-    "loadFailed": "Failed to load model"
+    "loadFailed": "Failed to load model",
+    "axes": "Axes: X red, Y green, Z blue"
   },
   "engine": {
     "connected": "Connected",

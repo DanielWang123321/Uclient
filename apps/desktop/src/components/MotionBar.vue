@@ -62,12 +62,12 @@ const RPY: Seg[] = [
   { label: 'P−', axis: 'pitch', dir: -1 }, { label: 'R−', axis: 'roll', dir: -1 },
 ]
 const padActive = ref<Record<string, number>>({ xyz: -1, rpy: -1 })
-const RING = 180
+const RING = 140
 function padDown(e: PointerEvent, pad: 'xyz' | 'rpy') {
   const el = e.currentTarget as HTMLElement
   const r = el.getBoundingClientRect()
   const k = r.width / RING
-  const seg = padSegment(e.clientX - r.left - r.width / 2, e.clientY - r.top - r.height / 2, 47 * k, 90 * k)
+  const seg = padSegment(e.clientX - r.left - r.width / 2, e.clientY - r.top - r.height / 2, 36 * k, 68 * k)
   if (seg < 0) return
   const s = (pad === 'xyz' ? XYZ : RPY)[seg]
   padActive.value[pad] = seg
@@ -96,8 +96,6 @@ onBeforeUnmount(() => motion.stop())
       <span class="gap" />
       <button class="btn" :disabled="busy" data-test="home" @click="motion.home()">{{ $t('motion.home') }}</button>
       <button class="btn" :disabled="busy" data-test="align" @click="motion.align()">{{ $t('motion.align') }}</button>
-      <span class="flex" />
-      <button class="btn stop" data-test="stop" @click="motion.stop()">STOP</button>
     </div>
     <div v-show="open" class="halves">
       <div class="half joints">
@@ -164,47 +162,45 @@ onBeforeUnmount(() => motion.stop())
 
 <style scoped>
 .mbar { background: #1f2023; color: #e6e7ea; border-radius: 16px; padding: 0; box-sizing: border-box; user-select: none; font-size: 13px; }
-.hdr { display: flex; align-items: center; gap: 10px; font-size: 12px; white-space: nowrap; padding: 0 16px; height: 69px; box-sizing: border-box; border-bottom: 1px solid #303136; }
-.halves { display: flex; height: 299px; }
+.hdr { display: flex; align-items: center; gap: 10px; font-size: 12px; white-space: nowrap; padding: 0 16px; height: 46px; box-sizing: border-box; border-bottom: 1px solid #303136; }
+.halves { display: flex; height: 194px; }
 button { font: inherit; color: inherit; border: 0; cursor: pointer; }
 button:disabled { opacity: .5; cursor: default; }
 .chev { width: 26px; height: 26px; border-radius: 6px; background: #2a2b2f; display: grid; place-items: center; transition: transform .15s; }
 .chev.closed { transform: rotate(180deg); }
 .lbl { color: #9a9ca3; margin-left: 6px; }
-.speed { width: 110px; --el-slider-main-bg-color: #3b6ef5; --el-slider-runway-bg-color: #3a3b40; --el-slider-height: 4px; --el-slider-button-size: 14px; }
+.speed { width: 110px; height: 20px; --el-slider-main-bg-color: #3b6ef5; --el-slider-runway-bg-color: #3a3b40; --el-slider-height: 4px; --el-slider-button-size: 14px; }
 .pctv { width: 36px; }
 .gap { width: 14px; }
-.flex { flex: 1; }
-.btn { background: #2a2b2f; border-radius: 7px; padding: 10px 18px; font-size: 14px; }
+.btn { background: #2a2b2f; border-radius: 6px; padding: 6px 14px; font-size: 13px; }
 .btn:hover:not(:disabled) { background: #34353a; }
-.btn.stop { background: #e5383b; color: #fff; font-weight: 700; letter-spacing: 1px; padding: 10px 30px; font-size: 15px; box-shadow: 0 0 0 2px rgba(229, 56, 59, .35); }
-.btn.stop:hover { background: #f04a4d; }
 .half { flex: 1; min-width: 0; }
 .half + .half { border-left: 1px solid #303136; }
-.joints { flex: .95; display: flex; flex-direction: column; justify-content: space-evenly; padding: 6px 16px; }
-.jr { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+.joints { flex: .95; display: flex; flex-direction: column; justify-content: space-evenly; padding: 4px 16px; }
+.jr { display: flex; align-items: center; gap: 8px; font-size: 12px; }
 .jr label { width: 20px; font-weight: 600; }
-.lim { width: 34px; font-size: 10px; color: #6f7177; text-align: center; font-family: inherit; }
-.jsl { flex: 1; min-width: 60px; --el-slider-main-bg-color: var(--jc); --el-slider-runway-bg-color: #3a3b40; --el-slider-height: 5px; --el-slider-button-size: 15px; }
+.lim { width: 30px; font-size: 10px; color: #6f7177; text-align: center; font-family: inherit; }
+.jsl { flex: 1; min-width: 60px; height: 20px; --el-slider-main-bg-color: var(--jc); --el-slider-runway-bg-color: #3a3b40; --el-slider-height: 5px; --el-slider-button-size: 15px; }
 .jsl :deep(.el-slider__button) { border-color: var(--jc); border-width: 3px; }
-.val { width: 60px !important; }
+.val { width: 54px !important; }
+.val :deep(.el-input__wrapper) { min-height: 0; height: 20px; }
 .val :deep(.el-input__wrapper) { background: #16171a; box-shadow: none; padding: 0 4px; }
 .val :deep(.el-input__inner) { color: #e6e7ea; text-align: center; font-variant-numeric: tabular-nums; }
-.pill { background: #2f3035; border-radius: 14px; padding: 5px 15px; font-size: 14px; text-align: center; touch-action: none; }
+.pill { background: #2f3035; border-radius: 12px; padding: 1px 13px; font-size: 14px; line-height: 18px; text-align: center; touch-action: none; }
 .pill:hover { background: #3a3b40; }
 .pill.on { background: #3b6ef5; }
-.pill.w { min-width: 84px; font-size: 13px; padding: 7px 0; }
-.pads { display: flex; align-items: center; justify-content: space-evenly; padding: 18px 28px; }
-.padw { display: flex; flex-direction: column; align-items: center; gap: 18px; }
-.ab { display: flex; gap: 20px; }
-.ring { position: relative; width: 180px; height: 180px; border-radius: 50%; touch-action: none; cursor: pointer;
-  background: radial-gradient(circle, #1f2023 0 46px, #2f3035 47px 87px, #1f2023 88px); }
+.pill.w { min-width: 64px; font-size: 12px; padding: 3px 0; }
+.pads { display: flex; align-items: center; justify-content: space-evenly; padding: 8px 28px; }
+.padw { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.ab { display: flex; gap: 16px; }
+.ring { position: relative; width: 140px; height: 140px; border-radius: 50%; touch-action: none; cursor: pointer;
+  background: radial-gradient(circle, #1f2023 0 35px, #2f3035 36px 67px, #1f2023 68px); }
 .wedge { position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
   background: conic-gradient(from var(--rot), #3b6ef5 0 90deg, transparent 90deg);
-  -webkit-mask: radial-gradient(circle, transparent 47px, #000 48px 87px, transparent 88px);
-  mask: radial-gradient(circle, transparent 47px, #000 48px 87px, transparent 88px); }
-.ctr { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 700; font-size: 16px; pointer-events: none; }
-.d { position: absolute; font-size: 14px; width: 40px; height: 26px; line-height: 26px; text-align: center; pointer-events: none; color: #c9cbd1; z-index: 1; }
-.d.t { top: 10px; left: 70px; } .d.b { bottom: 10px; left: 70px; } .d.l { left: 6px; top: 77px; } .d.r { right: 6px; top: 77px; }
+  -webkit-mask: radial-gradient(circle, transparent 36px, #000 37px 67px, transparent 68px);
+  mask: radial-gradient(circle, transparent 36px, #000 37px 67px, transparent 68px); }
+.ctr { position: absolute; inset: 0; display: grid; place-items: center; font-weight: 700; font-size: 13px; pointer-events: none; }
+.d { position: absolute; font-size: 12px; width: 34px; height: 22px; line-height: 22px; text-align: center; pointer-events: none; color: #c9cbd1; z-index: 1; }
+.d.t { top: 7px; left: 53px; } .d.b { bottom: 7px; left: 53px; } .d.l { left: 3px; top: 59px; } .d.r { right: 3px; top: 59px; }
 .d.act { color: #fff; font-weight: 700; }
 </style>
