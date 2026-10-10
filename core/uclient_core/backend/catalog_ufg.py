@@ -120,7 +120,7 @@ def _default_tcp(end_effector: str, visual_urdf: Path, ee_link: str) -> tuple[tu
     for name in _URDF_TCP_FRAMES:
         if model.existFrame(name):
             T = data.oMf[model.getFrameId(ee_link)].actInv(data.oMf[model.getFrameId(name)])
-            xyz = [round(float(v) * 1000.0, 3) for v in T.translation]
+            xyz = [round(float(v) * 1000.0, 3) + 0.0 for v in T.translation]
             rpy = [round(float(np.degrees(a)), 3) + 0.0 for a in matrix_to_rpy(T.rotation)]
             joint = next(
                 (
