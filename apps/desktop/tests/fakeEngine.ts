@@ -33,7 +33,7 @@ export class FakeWs {
 
 export const HELLO = {
   api_version: '1.0',
-  core_version: '0.1.1',
+  core_version: '0.2.0',
   ufactory_genesis_version: '0.3.0',
   ufactory_genesis_commit: 'be49519',
   pinocchio_version: '4.0.0',
