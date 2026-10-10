@@ -2,6 +2,7 @@
 // Engine connection status and language switch, tucked into the bottom of the left panel.
 import { inject, ref } from 'vue'
 import { useEngineStore } from '../stores/engine'
+import SettingsDialog from './SettingsDialog.vue'
 const showSettings = ref(false)
 const engine = useEngineStore()
 const retry = inject<() => void>('engine.retry', () => {})
@@ -18,9 +19,7 @@ const retry = inject<() => void>('engine.retry', () => {})
     <button class="settings" data-test="settings" @click="showSettings = true">⚙ {{ $t('settings.title') }}</button>
   </div>
   <div class="tag">{{ $t('app.personal') }}</div>
-  <el-dialog v-model="showSettings" :title="$t('settings.title')" width="420px" class="dark-panel dark-dialog" append-to-body>
-    <div class="placeholder" data-test="settings-dialog">{{ $t('settings.placeholder') }}</div>
-  </el-dialog>
+  <SettingsDialog v-model="showSettings" />
 </template>
 
 <style scoped>
@@ -33,6 +32,5 @@ const retry = inject<() => void>('engine.retry', () => {})
 .lnk { background: none; border: 0; color: #3b6ef5; cursor: pointer; font-size: 11px; }
 .settings { background: #2a2b2f; color: #e6e7ea; border: 0; border-radius: 6px; padding: 5px 10px; font: inherit; font-size: 12px; cursor: pointer; }
 .settings:hover { background: #34353a; }
-.placeholder { color: #9a9ca3; padding: 24px 0; text-align: center; }
 .tag { font-size: 10px; color: #6f7177; margin-top: 8px; }
 </style>

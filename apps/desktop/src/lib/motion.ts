@@ -2,10 +2,13 @@
 // All tunables live here; a settings page will make them configurable later.
 
 export const MOTION = {
-  /** One click moves this far on a linear TCP axis (mm). */
+  /** Default click step on a linear TCP axis (mm); user-configurable in Settings > Jog. */
   stepMm: 1,
-  /** One click moves this far on a rotation axis or a joint (deg). */
+  /** Default click step on a rotation axis or a joint (deg); user-configurable in Settings > Jog. */
   stepDeg: 1,
+  /** Valid range of the configurable click steps. */
+  stepMmRange: [0.01, 100] as [number, number],
+  stepDegRange: [0.01, 45] as [number, number],
   /** Holding a button longer than this switches to continuous motion (ms). */
   longPressMs: 300,
   /** Linear speed at 100 % (mm/s). */
@@ -28,9 +31,18 @@ export function isLinear(t: JogTarget): boolean {
   return t.kind === 'tcp' && (t.axis === 'x' || t.axis === 'y' || t.axis === 'z')
 }
 
+export interface Steps { mm: number; deg: number }
+
 /** Single-click increment (mm or deg). */
-export function stepSize(t: JogTarget): number {
-  return isLinear(t) ? MOTION.stepMm : MOTION.stepDeg
+export function stepSize(t: JogTarget, steps: Steps = { mm: MOTION.stepMm, deg: MOTION.stepDeg }): number {
+  return isLinear(t) ? steps.mm : steps.deg
+}
+
+/** Validate a configured step; returns the fallback for invalid input and clamps into range. */
+export function sanitizeStep(v: unknown, range: [number, number], fallback: number): number {
+  const n = typeof v === 'number' ? v : Number(v)
+  if (!Number.isFinite(n) || n <= 0) return fallback
+  return Math.min(range[1], Math.max(range[0], n))
 }
 
 /** Continuous rate (mm/s or deg/s) at a speed percentage. */

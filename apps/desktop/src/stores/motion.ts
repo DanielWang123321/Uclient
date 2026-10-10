@@ -6,8 +6,11 @@ import { useEngineStore } from './engine'
 import { useRobotStore } from './robot'
 import { i18n } from '../i18n'
 import { RpcError } from '../rpc/client'
-import type { JogResult } from '../rpc/types'
-import { MOTION, STATE, approach, rate, stepJoint, stepSize, type JogTarget } from '../lib/motion'
+import type { FkResult, JogResult } from '../rpc/types'
+import { MOTION, STATE, approach, rate, stepSize, type JogTarget } from '../lib/motion'
+import { checkBoundary, hasTcpBounds, violationAxis, type Boundary, type Violation } from '../lib/boundary'
+import { useSettingsStore } from './settings'
+import { fmt } from '../lib/units'
 
 const IK_UNREACHABLE = 3001
 const IK_NOT_CONVERGED = 3002
@@ -28,8 +31,28 @@ export const useMotionStore = defineStore('motion', () => {
   const active = ref<JogTarget | null>(null)
   let token = 0
 
-  function limits(): [number, number][] {
-    return robot.info?.limits_deg ?? robot.q.map(() => [-360, 360] as [number, number])
+  const settings = useSettingsStore()
+
+  function boundary(): Boundary {
+    const model = robot.info?.limits_deg ?? robot.q.map(() => [-360, 360] as [number, number])
+    return settings.boundaryFor(robot.key, model)
+  }
+
+  function violationError(v: Violation): MotionError {
+    const t = i18n.global.t
+    const unit = v.kind === 'joint' ? '°' : ' mm'
+    return new MotionError(t('motion.errBoundary', { axis: violationAxis(v), side: t(`motion.${v.side}`), limit: `${fmt(v.limit, 1)}${unit}` }))
+  }
+
+  /** Throw if moving to nextQ (and its TCP pose) leaves the safety boundary. */
+  async function guard(nextQ: number[], nextTcp?: number[] | null) {
+    const b = boundary()
+    let tcp = nextTcp ?? null
+    if (!tcp && hasTcpBounds(b)) {
+      tcp = (await engine.call<FkResult>('kin.fk', { session_id: robot.sessionId, q_deg: nextQ })).tcp_pose
+    }
+    const v = checkBoundary(b, robot.q, nextQ, robot.fk?.tcp_pose ?? null, tcp)
+    if (v) throw violationError(v)
   }
 
   function describe(e: unknown): string {
@@ -45,14 +68,29 @@ export const useMotionStore = defineStore('motion', () => {
   /** Apply one increment (mm or deg, signed). Throws MotionError/RpcError when the move is impossible. */
   async function applyDelta(t: JogTarget, delta: number) {
     if (t.kind === 'joint') {
-      const r = stepJoint(robot.q, t.index, delta, limits())
-      void robot.setQ(r.q)
-      if (r.hitLimit) throw new MotionError(i18n.global.t('motion.errJointLimit', { j: t.index + 1 }))
+      const i = t.index
+      const want = [...robot.q]
+      want[i] += delta
+      const v = checkBoundary(boundary(), robot.q, want)
+      if (v?.kind === 'joint') {
+        // stop exactly on the bound if we were inside it, then report
+        const inside = v.side === 'max' ? robot.q[i] <= v.limit : robot.q[i] >= v.limit
+        if (inside) {
+          const onBound = [...robot.q]
+          onBound[i] = v.limit
+          await guard(onBound)
+          void robot.setQ(onBound)
+        }
+        throw violationError(v)
+      }
+      await guard(want)
+      void robot.setQ(want)
       return
     }
     const r = await engine.call<JogResult>('motion.jog_tcp', {
       session_id: robot.sessionId, q_deg: [...robot.q], axis: t.axis, delta,
     })
+    await guard(r.q_deg, r.tcp_pose)
     void robot.setQ(r.q_deg)
   }
 
@@ -65,14 +103,14 @@ export const useMotionStore = defineStore('motion', () => {
     }
   }
 
-  /** Single click: one step (1 mm / 1 deg). */
+  /** Single click: one step (Settings > Jog, default 1 mm / 1 deg). */
   async function step(t: JogTarget, dir: 1 | -1) {
     if (!robot.sessionId) return
     const my = ++token
     state.value = STATE.moving
     active.value = t
     try {
-      await applyDelta(t, dir * stepSize(t))
+      await applyDelta(t, dir * stepSize(t, { mm: settings.stepMm, deg: settings.stepDeg }))
       if (my === token) stop()
     } catch (e) {
       await fail(e)
@@ -114,6 +152,13 @@ export const useMotionStore = defineStore('motion', () => {
       const dt = Math.min(MAX_DT_S, (tNow - last) / 1000)
       last = tNow
       const r = approach(robot.q, target, MOTION.maxAngularDegS * (speed.value / 100) * dt)
+      try {
+        await guard(r.q)
+      } catch (e) {
+        if (my === token) await fail(e)
+        return
+      }
+      if (my !== token) return
       void robot.setQ(r.q)
       if (r.done) {
         if (my === token) stop()
@@ -136,7 +181,7 @@ export const useMotionStore = defineStore('motion', () => {
     }
   }
 
-  /** Click on Home / Align: one joint-space step (at most stepDeg per joint) toward the target, then state 4. */
+  /** Click on Home / Align: one joint-space step (at most the angular click step per joint) toward the target, then state 4. */
   async function goStep(kind: GoTarget) {
     if (!robot.sessionId) return
     const my = ++token
@@ -144,7 +189,14 @@ export const useMotionStore = defineStore('motion', () => {
     if (!target || my !== token) return
     state.value = STATE.moving
     active.value = null
-    await robot.setQ(approach(robot.q, target, MOTION.stepDeg).q)
+    const next = approach(robot.q, target, settings.stepDeg).q
+    try {
+      await guard(next)
+    } catch (e) {
+      await fail(e)
+      return
+    }
+    await robot.setQ(next)
     if (my === token) stop()
   }
 

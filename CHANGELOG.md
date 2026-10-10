@@ -11,7 +11,14 @@ All notable changes to UGClient (formerly Uclient) are documented here. Format: 
 - Camera framing tuned for the larger free scene area.
 - Home and Align follow the jog click/hold model: a click moves one joint-space step toward the target (at most 1 deg per joint) and ends in state 4; holding moves continuously at joint speed until release (state 4) or arrival. Align's unreachable error is shown before any motion.
 - The 中/EN language switch moved to a dark floating pill at the top right, next to STOP.
-- Settings button (⚙) at the bottom of the left panel opens a placeholder Settings dialog (contents to come).
+- Settings button (⚙) at the bottom of the left panel opens the Settings dialog.
+
+### Added
+- Settings dialog (dark style, persisted in localStorage `ugclient.settings`):
+  - Jog: click step for linear axes (mm, default 1) and angular axes / joints (deg, default 1), validated (0.01-100 mm, 0.01-45 deg). Replaces the hardcoded steps; hold threshold and speed scale stay fixed.
+  - Safety boundary, stored per robot model: TCP X/Y/Z min/max in the base frame (default unbounded) and per-joint min/max (default and clamped to the model limits). Jog, Home and Align stop at the boundary and a dialog names the axis (e.g. "TCP Z reached the safety boundary (max 240.0 mm)"). Moves back into the boundary are allowed.
+  - General: language (synced with the top-right switch), default robot model, restore the last session (robot, end effector, TCP offset, payload, joints) on startup.
+  - About: app, core, ufactory_genesis and Pinocchio versions, MIT license, personal-project note.
 
 ## [0.2.0] - 2026-10-10
 
