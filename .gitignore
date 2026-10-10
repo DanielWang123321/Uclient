@@ -1,0 +1,18 @@
+# Python
+.venv/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+# Pinned upstream checkout and build outputs
+third_party/
+build/
+dist-sidecar/
+# Frontend
+node_modules/
+apps/desktop/dist/
+apps/desktop/public/robot-assets/
+apps/desktop/public/draco/
+# Rust
+apps/desktop/src-tauri/target/
+apps/desktop/src-tauri/gen/schemas/
