@@ -15,7 +15,7 @@ const LOAD = {
 const EE_TCP: Record<string, number[]> = {
   none: [0, 0, 0, 0, 0, 0],
   gripper_g2: [0, 0, 172, 0, 0, 0],
-  bio_gripper_g2: [159.657, 0, 55, 0, 0, 0],
+  bio_gripper_g2: [159.5, 0, 59.5, 0, 0, 0],
 }
 const GOLDEN_Q = [0, -86.401, -144.409, -180, 58.007, -180]
 const TORQUE = {
@@ -83,7 +83,7 @@ describe('robot store', () => {
     expect(plCall?.params).toMatchObject({ mass_kg: 3, com_mm: [0, 0, 35] })
 
     await robot.select('uf850', 'bio_gripper_g2')
-    expect(robot.tcpOffset).toEqual([159.657, 0, 55, 0, 0, 0])
+    expect(robot.tcpOffset).toEqual([159.5, 0, 59.5, 0, 0, 0])
     await robot.select('uf850', 'none')
     expect(robot.tcpOffset).toEqual([0, 0, 0, 0, 0, 0])
   })

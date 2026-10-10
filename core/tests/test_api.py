@@ -113,8 +113,8 @@ def test_end_effector_combinations_and_default_tcp(client):
                 assert s["default_tcp_source"].endswith("#joint_tcp")
                 assert off == pytest.approx([0, 0, 172.0 if ee == "gripper_g2" else 83.6, 0, 0, 0])
             else:
-                assert s["default_tcp_source"].endswith("#bio_gripper_g2_tcp_joint")
-                assert np.linalg.norm(off[:3]) > 100
+                assert s["default_tcp_source"] == "official"
+                assert off == [159.5, 0.0, 59.5, 0.0, 0.0, 0.0]
             tau = client.call("dyn.gravity", session_id=s["session_id"], q_deg=q)["tau_nm"]
             base = base or tau
             np.testing.assert_allclose(tau, base, atol=1e-12)  # end effector adds no mass
@@ -154,3 +154,14 @@ def test_synced_assets_cover_every_visual_urdf(tmp_path):
             assert meshes, rel
             for m in meshes:
                 assert m.suffix == ".glb" and m.is_file(), f"{rel}: {m}"
+
+
+def test_bio_g2_default_tcp_is_official_constant(client):
+    """BIO G2 uses the official UFACTORY offset on every arm (not the URDF tcp frame)."""
+    from uclient_core.backend.catalog_ufg import OFFICIAL_TCP_OFFSETS
+
+    assert OFFICIAL_TCP_OFFSETS["bio_gripper_g2"] == (159.5, 0.0, 59.5, 0.0, 0.0, 0.0)
+    for robot in ("uf850", "xarm5_1305", "xarm6_1305", "xarm7_1305"):
+        s = client.call("robot.info", robot=robot, end_effector="bio_gripper_g2")
+        assert s["default_tcp_offset"] == [159.5, 0.0, 59.5, 0.0, 0.0, 0.0]
+        assert s["default_tcp_source"] == "official"

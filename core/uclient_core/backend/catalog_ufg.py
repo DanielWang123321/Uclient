@@ -94,20 +94,27 @@ class UfgCatalog:
         return {"ufactory_genesis_version": _ufg_version(), "ufactory_genesis_commit": _ufg_commit()}
 
 
+#: Official end-effector TCP offsets [x, y, z mm, r, p, y deg] that ufactory_genesis does not provide.
+#: BIO Gripper G2: official UFACTORY value per maintainer (same on all arms); the upstream URDF
+#: tcp frame differs slightly (e.g. y -1.8 mm / yaw -0.4 deg on xArm) and is not used.
+OFFICIAL_TCP_OFFSETS: dict[str, tuple[float, ...]] = {
+    "bio_gripper_g2": (159.5, 0.0, 59.5, 0.0, 0.0, 0.0),
+}
 #: TCP frames defined in the upstream combo URDFs.
-_URDF_TCP_FRAMES = ("bio_gripper_g2_tcp_link", "link_tcp")
+_URDF_TCP_FRAMES = ("link_tcp",)
 
 
 def _default_tcp(end_effector: str, visual_urdf: Path, ee_link: str) -> tuple[tuple[float, ...], str]:
-    """Default TCP offset of an end effector, read at runtime from the ufactory_genesis combo URDF.
+    """Default TCP offset of an end effector (``OFFICIAL_TCP_OFFSETS`` first), else read at runtime from the ufactory_genesis combo URDF.
 
-    The TCP is the URDF tcp frame (``link_tcp`` for G2 / Lite6 gripper, ``bio_gripper_g2_tcp_link``
-    for BIO G2) expressed in the flange frame. ``gripper.tool_tip_offset_z_m`` of the runtime config
+    The TCP is the URDF tcp frame (``link_tcp`` for G2 / Lite6 gripper) expressed in the flange frame. ``gripper.tool_tip_offset_z_m`` of the runtime config
     is a grasp-planning offset, not the TCP, and is deliberately not used. Lite6 vacuum gripper:
     upstream defines no TCP frame, so the flange (zero offset) is used.
     """
     if end_effector == "none":
         return (0.0,) * 6, "none"
+    if end_effector in OFFICIAL_TCP_OFFSETS:
+        return OFFICIAL_TCP_OFFSETS[end_effector], "official"
     import xml.etree.ElementTree as ET
 
     import numpy as np
