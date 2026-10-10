@@ -1,0 +1,9 @@
+{
+  "bundle": {
+    "resources": {
+      "../../../dist-sidecar/uclient-core/": "uclient-core/",
+      "../../../NOTICE": "NOTICE",
+      "../../../LICENSE": "LICENSE"
+    }
+  }
+}
