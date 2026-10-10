@@ -29,6 +29,10 @@ export interface RobotInfo {
   visual_urdf_relpath: string
   home_q_deg: number[]
   end_effectors: string[]
+  end_effector: string
+  /** Default TCP offset of the end effector [x,y,z mm, r,p,y deg]; visual only, adds no mass. */
+  default_tcp_offset: number[]
+  default_tcp_source: string
 }
 
 export interface RobotLoadResult extends RobotInfo {

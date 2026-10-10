@@ -33,6 +33,7 @@ export class SceneController {
   private renderRequested = false
   private resizeObs: ResizeObserver | null = null
   private draco: DRACOLoader
+  private loadSeq = 0
   onLoaded: (ok: boolean, err?: unknown) => void = () => {}
 
   constructor(private host: HTMLElement) {
@@ -79,11 +80,15 @@ export class SceneController {
 
   loadUrdf(relpath: string, eeLink: string) {
     this.eeLink = eeLink
+    const seq = ++this.loadSeq
     if (this.robot) {
+      // keep the shared overlay helpers alive; only the robot meshes are disposed
+      for (const o of [this.tcpAxes, this.com, this.gravityArrow]) o.removeFromParent()
       this.scene.remove(this.robot)
       this.disposeObject(this.robot)
       this.robot = null
     }
+    let failed: string | null = null
     const manager = new THREE.LoadingManager()
     const loader = new URDFLoader(manager)
     const gltf = new GLTFLoader(manager)
@@ -93,12 +98,15 @@ export class SceneController {
         path,
         (g) => done(g.scene),
         undefined,
-        (err) => done(null as unknown as THREE.Object3D, err as Error),
+        (err) => {
+          failed = path
+          done(null as unknown as THREE.Object3D, err as Error)
+        },
       )
     }
     let robot: URDFRobot | null = null
     manager.onLoad = () => {
-      if (!robot) return
+      if (!robot || seq !== this.loadSeq) return
       this.robot = robot
       this.scene.add(robot)
       const ee = robot.links[this.eeLink]
@@ -108,9 +116,12 @@ export class SceneController {
         ee.add(this.gravityArrow)
       }
       this.requestRender()
-      this.onLoaded(true)
+      if (failed) this.onLoaded(false, new Error(`failed to load ${failed}`))
+      else this.onLoaded(true)
     }
-    manager.onError = (url) => this.onLoaded(false, new Error(`failed to load ${url}`))
+    manager.onError = (url) => {
+      failed = url
+    }
     loader.load(ASSET_BASE + relpath, (r) => {
       robot = r
     })

@@ -33,12 +33,17 @@ export const useRobotStore = defineStore('robot', () => {
   }
 
   async function load(robotKey = key.value, ee = endEffector.value) {
+    const prev = info.value
     const r = await engine.call<RobotLoadResult>('robot.load', { robot: robotKey, end_effector: ee })
+    const sameArm = prev?.key === robotKey
     key.value = robotKey
-    endEffector.value = ee
+    endEffector.value = r.end_effector ?? ee
     info.value = r
-    q.value = [...r.default_q_deg]
+    if (!sameArm || q.value.length !== r.dof) q.value = [...r.default_q_deg]
     check.value = null
+    // Mounting a tool sets its default TCP (user can still edit it). The tool is visual only:
+    // the payload (tool + workpiece, as in UFACTORY Studio) is kept unchanged.
+    if (!sameArm || prev?.end_effector !== r.end_effector) tcpOffset.value = [...r.default_tcp_offset]
     await applyTcp()
     await applyPayload()
   }
@@ -86,6 +91,18 @@ export const useRobotStore = defineStore('robot', () => {
     }
   }
 
+  /** Change robot model and/or end effector, reporting failures instead of throwing. */
+  async function select(robotKey: string, ee: string) {
+    try {
+      await load(robotKey, ee)
+      lastError.value = ''
+      return true
+    } catch (e) {
+      lastError.value = e instanceof Error ? e.message : String(e)
+      return false
+    }
+  }
+
   async function setJoint(i: number, deg: number) {
     q.value[i] = deg
     await refresh()
@@ -125,6 +142,6 @@ export const useRobotStore = defineStore('robot', () => {
 
   return {
     robots, key, endEffector, info, q, tcpOffset, payload, fk, torque, check, selectedSolution, lastError, busy,
-    sessionId, fetchRobots, load, applyTcp, applyPayload, refresh, setJoint, setQ, checkPose, selectSolution,
+    sessionId, fetchRobots, load, select, applyTcp, applyPayload, refresh, setJoint, setQ, checkPose, selectSolution,
   }
 })

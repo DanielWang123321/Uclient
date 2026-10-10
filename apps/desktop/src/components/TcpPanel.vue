@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRobotStore } from '../stores/robot'
 const robot = useRobotStore()
 const labels = ['x', 'y', 'z', 'r', 'p', 'y']
@@ -8,10 +9,14 @@ watch(
   () => robot.tcpOffset,
   (v) => (draft.value = [...v]),
 )
-const presets = [
-  { name: 'Flange', offset: [0, 0, 0, 0, 0, 0] },
-  { name: 'Gripper G2', offset: [0, 0, 101.1, 0, 0, 0] },
-]
+const { t } = useI18n()
+const presets = computed(() => {
+  const list = [{ name: t('tcp.flange'), offset: [0, 0, 0, 0, 0, 0] }]
+  const info = robot.info
+  if (info && info.end_effector !== 'none')
+    list.push({ name: `${t(`ee.${info.end_effector}`)} (${t('tcp.toolDefault')})`, offset: [...info.default_tcp_offset] })
+  return list
+})
 </script>
 
 <template>

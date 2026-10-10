@@ -2,10 +2,10 @@
 import { useRobotStore } from '../stores/robot'
 const robot = useRobotStore()
 async function onModel(k: string) {
-  await robot.load(k, 'none')
+  await robot.select(k, 'none')
 }
 async function onEe(ee: string) {
-  await robot.load(robot.key, ee)
+  await robot.select(robot.key, ee)
 }
 </script>
 
@@ -19,11 +19,11 @@ async function onEe(ee: string) {
         </el-select>
       </el-form-item>
       <el-form-item :label="$t('robot.endEffector')">
-        <el-select :model-value="robot.endEffector" @update:model-value="onEe">
+        <el-select :model-value="robot.endEffector" data-test="ee-select" @update:model-value="onEe">
           <el-option
             v-for="e in robot.info?.end_effectors ?? ['none']"
             :key="e"
-            :label="e === 'none' ? $t('robot.none') : e"
+            :label="$t(`ee.${e}`)"
             :value="e"
           />
         </el-select>
@@ -34,5 +34,6 @@ async function onEe(ee: string) {
         </el-select>
       </el-form-item>
     </el-form>
+    <div class="hint">{{ $t('robot.eeHint') }}</div>
   </div>
 </template>
