@@ -19,7 +19,9 @@ const tcpLabels = ['X', 'Y', 'Z', 'Roll', 'Pitch', 'Yaw']
     <div class="kv">
       <i>{{ $t('info.state') }}</i>
       <b :class="stateKey" data-test="sim-state">{{ $t(`info.${stateKey}`) }} ({{ motion.state }})</b>
+      <i>{{ $t('info.mode') }}</i><b>{{ $t('info.position') }}</b>
       <i>{{ $t('info.payload') }}</i><b class="num">{{ fmt(robot.payload.mass_kg, 2) }} kg</b>
+      <i>{{ $t('robot.mounting') }}</i><b>{{ $t('robot.floor') }}</b>
     </div>
     <div class="panel-title">{{ $t('info.tcp') }}</div>
     <div class="kv">

@@ -2,9 +2,6 @@
 import RobotPanel from '../components/RobotPanel.vue'
 import TcpPanel from '../components/TcpPanel.vue'
 import PayloadPanel from '../components/PayloadPanel.vue'
-import StatusPanel from '../components/StatusPanel.vue'
-import JogPanel from '../components/JogPanel.vue'
-import TorquePanel from '../components/TorquePanel.vue'
 import Viewport from '../components/Viewport.vue'
 import MotionBar from '../components/MotionBar.vue'
 import InfoPanel from '../components/InfoPanel.vue'
@@ -18,8 +15,6 @@ import InfoPanel from '../components/InfoPanel.vue'
       <TcpPanel />
       <el-divider />
       <PayloadPanel />
-      <el-divider />
-      <StatusPanel />
     </aside>
     <main class="center">
       <div class="vp"><Viewport /></div>
@@ -27,10 +22,6 @@ import InfoPanel from '../components/InfoPanel.vue'
     </main>
     <aside class="right">
       <InfoPanel />
-      <el-divider />
-      <JogPanel />
-      <el-divider />
-      <TorquePanel />
     </aside>
   </div>
 </template>

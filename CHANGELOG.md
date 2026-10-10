@@ -11,7 +11,10 @@ All notable changes to UGClient (formerly Uclient) are documented here. Format: 
 - Joint limit hits and unreachable targets stop the motion and show a dialog.
 
 ### Changed
-- The right panel starts with a read-only state view (simulated state, payload, TCP pose, joint angles). The joint sliders moved from the right panel into the motion bar.
+- Check page now follows the approved v8 mockup: the right panel is a read-only state view (state, mode, payload, mounting, TCP pose, joint angles); joint sliders live in the motion bar.
+
+### Removed
+- Check page "Target TCP pose / Solve IK" section, the joint torque table (incl. CSV export button) and the left-panel Status (TCP/Flange) block. The sidecar methods (`check.pose`, `kin.ik`, `dyn.gravity`) and store functions remain.
 
 ## [0.1.1] - 2026-10-10
 

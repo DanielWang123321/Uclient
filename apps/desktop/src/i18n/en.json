@@ -31,33 +31,6 @@
     "hint": "Total tool + workpiece mass, same as UFACTORY Studio. End-effector models are visual only.",
     "apply": "Apply"
   },
-  "status": {
-    "title": "Status",
-    "tcp": "TCP",
-    "flange": "Flange",
-    "reachable": "Reachable",
-    "solutions": "{n} solutions"
-  },
-  "jog": {
-    "title": "Joints",
-    "joint": "Joint",
-    "linear": "Linear",
-    "target": "Target TCP pose",
-    "solve": "Solve IK",
-    "solution": "Solution",
-    "frame": "Pose frame",
-    "home": "Zero"
-  },
-  "torque": {
-    "title": "Joint torque (N·m / %)",
-    "total": "Total",
-    "arm": "Arm",
-    "payload": "Payload",
-    "exportCsv": "Export CSV",
-    "assumption": "Static gravity only; no friction, gearbox efficiency or per-unit calibration.",
-    "max": "Max torque",
-    "pct": "% of max torque"
-  },
   "view": {
     "reset": "Reset view",
     "base": "Base",
@@ -102,6 +75,8 @@
     "joints": "Joint angles",
     "moving": "Moving",
     "ready": "Ready",
-    "stopped": "Stopped"
+    "stopped": "Stopped",
+    "mode": "Mode",
+    "position": "Position"
   }
 }

@@ -26,13 +26,10 @@ declare module 'vue' {
     ElSelect: typeof import('element-plus/es')['ElSelect']
     ElSlider: typeof import('element-plus/es')['ElSlider']
     InfoPanel: typeof import('./components/InfoPanel.vue')['default']
-    JogPanel: typeof import('./components/JogPanel.vue')['default']
     MotionBar: typeof import('./components/MotionBar.vue')['default']
     PayloadPanel: typeof import('./components/PayloadPanel.vue')['default']
     RobotPanel: typeof import('./components/RobotPanel.vue')['default']
-    StatusPanel: typeof import('./components/StatusPanel.vue')['default']
     TcpPanel: typeof import('./components/TcpPanel.vue')['default']
-    TorquePanel: typeof import('./components/TorquePanel.vue')['default']
     Viewport: typeof import('./components/Viewport.vue')['default']
   }
 }
