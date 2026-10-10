@@ -32,6 +32,9 @@ def _describe(info) -> dict[str, Any]:
         "visual_urdf_relpath": info.visual_urdf_relpath,
         "home_q_deg": units.rad_to_deg(info.home_q_rad).tolist(),
         "end_effectors": list(info.end_effectors),
+        "end_effector": info.end_effector,
+        "default_tcp_offset": list(info.default_tcp_offset),
+        "default_tcp_source": info.default_tcp_source,
     }
 
 

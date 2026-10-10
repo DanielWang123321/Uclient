@@ -86,3 +86,70 @@ def test_schema_lists_every_method():
 
     schema = json.loads((Path(__file__).resolve().parents[2] / "schema" / "api.v1.json").read_text(encoding="utf-8"))
     assert set(METHODS) | {"system.hello", "system.shutdown", "ping"} == set(schema["methods"])
+
+
+def test_end_effector_combinations_and_default_tcp(client):
+    """Every supported arm x end effector loads, has a default TCP read from ufactory_genesis, and the
+    end effector is visual only (gravity torques do not change)."""
+    from ufactory.config.loader import load_runtime_config
+
+    expected = {
+        "uf850": {"none", "gripper_g2", "bio_gripper_g2"},
+        "xarm5_1305": {"none", "gripper_g2", "bio_gripper_g2"},
+        "xarm6_1305": {"none", "gripper_g2", "bio_gripper_g2"},
+        "xarm7_1305": {"none", "gripper_g2", "bio_gripper_g2"},
+        "lite6": {"none", "lite6_gripper", "lite6_vacuum_gripper"},
+    }
+    for r in client.call("robot.list"):
+        assert set(r["end_effectors"]) == expected[r["key"]]
+        tool_tip_mm = load_runtime_config(r["key"]).gripper.tool_tip_offset_z_m * 1000.0
+        q = [10.0, -30.0, -40.0, 20.0, 35.0, 0.0, 5.0][: r["dof"]]
+        base = None
+        for ee in r["end_effectors"]:
+            s = client.call("robot.load", robot=r["key"], end_effector=ee)
+            assert s["end_effector"] == ee
+            off = s["default_tcp_offset"]
+            assert len(off) == 6
+            if ee == "none" or ee == "lite6_vacuum_gripper":
+                assert off == [0.0] * 6
+            elif ee in ("gripper_g2", "lite6_gripper"):
+                assert s["default_tcp_source"] == "runtime_config"
+                assert off == pytest.approx([0, 0, tool_tip_mm, 0, 0, 0])
+            else:
+                assert s["default_tcp_source"] == "urdf:bio_gripper_g2_tcp_link"
+                assert np.linalg.norm(off[:3]) > 100
+            tau = client.call("dyn.gravity", session_id=s["session_id"], q_deg=q)["tau_nm"]
+            base = base or tau
+            np.testing.assert_allclose(tau, base, atol=1e-12)  # end effector adds no mass
+
+
+def test_g2_default_offset_is_101_1_mm(client):
+    s = client.call("robot.info", robot="uf850", end_effector="gripper_g2")
+    assert s["default_tcp_offset"] == pytest.approx([0, 0, 101.1, 0, 0, 0])
+
+
+def test_synced_assets_cover_every_visual_urdf(tmp_path):
+    """Regression: gripper GLBs outside visual_glb/ were not copied, so grippers never rendered."""
+    import importlib.util
+    from pathlib import Path
+
+    from uclient_core.backend import factory
+
+    root = Path(__file__).resolve().parents[2]
+    spec = importlib.util.spec_from_file_location("sync_assets", root / "scripts" / "sync_assets.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    from ufactory.robots.registry import PROJECT_ROOT
+
+    dst = tmp_path / "urdf"
+    mod.sync(Path(PROJECT_ROOT) / "assets" / "urdf", dst)
+    cat = factory.catalog()
+    for key in cat.list_keys():
+        for ee in cat.end_effectors(key):
+            rel = cat.info(key, ee).visual_urdf_relpath  # "urdf/<robot>/<file>"
+            urdf = dst / Path(rel).relative_to("urdf")
+            assert urdf.is_file(), rel
+            meshes = mod.visual_meshes(urdf)
+            assert meshes, rel
+            for m in meshes:
+                assert m.suffix == ".glb" and m.is_file(), f"{rel}: {m}"

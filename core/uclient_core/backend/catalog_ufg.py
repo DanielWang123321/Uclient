@@ -80,10 +80,52 @@ class UfgCatalog:
             effort_limits_nm=tuple(float(x) for x in cfg.arm.effort_limits_nm),
             home_q_rad=tuple(float(x) for x in cfg.arm.home_qpos_rad),
             end_effectors=ees,
+            end_effector=end_effector,
+            **dict(
+                zip(
+                    ("default_tcp_offset", "default_tcp_source"),
+                    _default_tcp(cfg, end_effector, visual, profile.ee_link),
+                    strict=True,
+                )
+            ),
         )
 
     def versions(self) -> dict[str, str]:
         return {"ufactory_genesis_version": _ufg_version(), "ufactory_genesis_commit": _ufg_commit()}
+
+
+#: End effectors whose tool-tip offset comes from the upstream runtime config (gripper.adapter must match).
+_RUNTIME_TCP = {"gripper_g2": "g2", "lite6_gripper": "lite6"}
+#: TCP frames defined in the upstream combo URDFs.
+_URDF_TCP_FRAMES = ("bio_gripper_g2_tcp_link", "link_tcp")
+
+
+def _default_tcp(cfg, end_effector: str, visual_urdf: Path, ee_link: str) -> tuple[tuple[float, ...], str]:
+    """Default TCP offset for an end effector, read from ufactory_genesis (never hard-coded).
+
+    G2 / Lite6 gripper: ``gripper.tool_tip_offset_z_m`` of the runtime config (e.g. 101.1 mm for G2).
+    Otherwise: the TCP frame of the combo visual URDF relative to the flange, if any (Bio G2).
+    Lite6 vacuum gripper: upstream defines no TCP, so the flange (zero offset) is used.
+    """
+    if end_effector == "none":
+        return (0.0,) * 6, "none"
+    adapter = _RUNTIME_TCP.get(end_effector)
+    if adapter is not None and getattr(cfg.gripper, "adapter", None) == adapter:
+        return (0.0, 0.0, round(float(cfg.gripper.tool_tip_offset_z_m) * 1000.0, 6), 0.0, 0.0, 0.0), "runtime_config"
+    import numpy as np
+    import pinocchio as pin
+    from ufactory.kinematics.tcp_offset import matrix_to_rpy
+
+    model = pin.buildModelFromUrdf(str(visual_urdf))
+    data = model.createData()
+    pin.framesForwardKinematics(model, data, pin.neutral(model))
+    for name in _URDF_TCP_FRAMES:
+        if model.existFrame(name):
+            T = data.oMf[model.getFrameId(ee_link)].actInv(data.oMf[model.getFrameId(name)])
+            xyz = [round(float(v) * 1000.0, 3) for v in T.translation]
+            rpy = [round(float(np.degrees(a)), 3) + 0.0 for a in matrix_to_rpy(T.rotation)]
+            return tuple(xyz + rpy), f"urdf:{name}"
+    return (0.0,) * 6, "none"
 
 
 def _ufg_version() -> str:
