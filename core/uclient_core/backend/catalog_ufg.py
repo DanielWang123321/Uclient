@@ -105,10 +105,12 @@ _URDF_TCP_FRAMES = ("link_tcp",)
 
 
 def _default_tcp(end_effector: str, visual_urdf: Path, ee_link: str) -> tuple[tuple[float, ...], str]:
-    """Default TCP offset of an end effector (``OFFICIAL_TCP_OFFSETS`` first), else read at runtime from the ufactory_genesis combo URDF.
+    """Default TCP offset of an end effector.
 
-    The TCP is the URDF tcp frame (``link_tcp`` for G2 / Lite6 gripper) expressed in the flange frame. ``gripper.tool_tip_offset_z_m`` of the runtime config
-    is a grasp-planning offset, not the TCP, and is deliberately not used. Lite6 vacuum gripper:
+    ``OFFICIAL_TCP_OFFSETS`` first (BIO G2); otherwise the tcp frame of the ufactory_genesis combo
+    URDF (``link_tcp`` for G2 / Lite6 gripper), read at runtime and expressed in the flange frame.
+    ``gripper.tool_tip_offset_z_m`` (runtime config) is a grasp-planning offset, not the TCP,
+    and is deliberately not used. Lite6 vacuum gripper:
     upstream defines no TCP frame, so the flange (zero offset) is used.
     """
     if end_effector == "none":
