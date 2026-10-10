@@ -163,9 +163,9 @@ onBeforeUnmount(() => motion.stop())
 </template>
 
 <style scoped>
-.mbar { background: #1f2023; color: #e6e7ea; border-radius: 16px; margin: 0 12px 12px; user-select: none; font-size: 12px; }
-.hdr { display: flex; align-items: center; gap: 10px; white-space: nowrap; padding: 0 16px; height: 69px; }
-.halves { display: flex; height: 299px; border-top: 1px solid #303136; }
+.mbar { background: #1f2023; color: #e6e7ea; border-radius: 16px; padding: 0; box-sizing: border-box; user-select: none; font-size: 13px; }
+.hdr { display: flex; align-items: center; gap: 10px; font-size: 12px; white-space: nowrap; padding: 0 16px; height: 69px; box-sizing: border-box; border-bottom: 1px solid #303136; }
+.halves { display: flex; height: 299px; }
 button { font: inherit; color: inherit; border: 0; cursor: pointer; }
 button:disabled { opacity: .5; cursor: default; }
 .chev { width: 26px; height: 26px; border-radius: 6px; background: #2a2b2f; display: grid; place-items: center; transition: transform .15s; }

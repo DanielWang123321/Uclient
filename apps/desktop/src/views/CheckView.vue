@@ -1,37 +1,44 @@
 <script setup lang="ts">
+// Check page shell, laid out exactly like the approved v8 mockup (1600x1000 reference):
+// a light 3D scene fills the window, dark rounded panels float on top.
 import RobotPanel from '../components/RobotPanel.vue'
 import TcpPanel from '../components/TcpPanel.vue'
 import PayloadPanel from '../components/PayloadPanel.vue'
 import Viewport from '../components/Viewport.vue'
 import MotionBar from '../components/MotionBar.vue'
 import InfoPanel from '../components/InfoPanel.vue'
+import AppFooter from '../components/AppFooter.vue'
+
+// Screen area covered by the panels, so the robot is centred in the free part of the scene.
+const insets = { left: 284, right: 274, top: 0, bottom: 388 }
 </script>
 
 <template>
   <div class="check">
-    <aside class="left">
+    <div class="scene"><Viewport :insets="insets" /></div>
+    <aside class="panel left dark-panel">
       <RobotPanel />
-      <el-divider />
+      <div class="sep" />
       <TcpPanel />
-      <el-divider />
+      <div class="sep" />
       <PayloadPanel />
+      <div class="grow" />
+      <AppFooter />
     </aside>
-    <main class="center">
-      <div class="vp"><Viewport /></div>
-      <MotionBar />
-    </main>
-    <aside class="right">
-      <InfoPanel />
-    </aside>
+    <aside class="panel right dark-panel"><InfoPanel /></aside>
+    <MotionBar class="bar" />
   </div>
 </template>
 
 <style scoped>
-.check { display: grid; grid-template-columns: 250px 1fr 330px; height: 100%; min-height: 0; }
-.left, .right { background: var(--uc-panel-bg); overflow-y: auto; padding: 4px 12px 12px; }
-.left { border-right: 1px solid var(--uc-border); }
-.right { border-left: 1px solid var(--uc-border); }
-.center { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
-.vp { position: relative; flex: 1; min-height: 0; }
-:deep(.el-divider--horizontal) { margin: 10px 0; }
+/* values copied from mockup-bottom-panel.html (v8) */
+.check { position: relative; width: 100%; height: 100%; overflow: hidden; background: #f7f8f9; color: #e6e7ea;
+  font: 13px "Inter", "Noto Sans", Arial, sans-serif; }
+.scene { position: absolute; inset: 0; }
+.panel { position: absolute; background: #1f2023; border-radius: 16px; padding: 16px; box-sizing: border-box; }
+.left { left: 12px; top: 12px; bottom: 12px; width: 260px; display: flex; flex-direction: column; overflow-y: auto; }
+.right { right: 12px; top: 12px; bottom: 12px; width: 250px; overflow-y: auto; }
+.bar { position: absolute; left: 284px; right: 274px; bottom: 12px; }
+.sep { border-top: 1px solid #333; margin: 14px 0; flex: none; }
+.grow { flex: 1; min-height: 14px; }
 </style>

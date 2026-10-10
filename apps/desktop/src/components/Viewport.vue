@@ -2,6 +2,7 @@
 import { markRaw, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { SceneController } from '../three/SceneController'
 import { useRobotStore } from '../stores/robot'
+const props = defineProps<{ insets?: { left: number; right: number; top: number; bottom: number } }>()
 const robot = useRobotStore()
 const host = ref<HTMLDivElement>()
 const state = ref<'idle' | 'loading' | 'ready' | 'error'>('idle')
@@ -25,6 +26,7 @@ onMounted(() => {
       ctl.setPayload(robot.payload.mass_kg, robot.payload.com_mm)
     }
   }
+  if (props.insets) ctl.setInsets(props.insets)
   ;(window as unknown as { __ugclientScene?: SceneController }).__ugclientScene = ctl
   load()
 })
@@ -33,6 +35,7 @@ onBeforeUnmount(() => {
   ctl = null
 })
 watch(() => robot.info?.visual_urdf_relpath, load)
+watch(() => props.insets, (i) => i && ctl?.setInsets(i), { deep: true })
 watch(
   () => [...robot.q],
   (q) => robot.info && ctl?.setJoints(robot.info.joint_names, q),
@@ -49,11 +52,12 @@ watch(show, (s) => {
 <template>
   <div class="vp">
     <div ref="host" class="canvas" data-test="viewport"></div>
-    <div class="toolbar">
-      <el-button size="small" @click="ctl?.resetView()">⟲ {{ $t('view.reset') }}</el-button>
-      <el-checkbox v-model="show.base" size="small">{{ $t('view.base') }}</el-checkbox>
-      <el-checkbox v-model="show.tcp" size="small">{{ $t('view.tcp') }}</el-checkbox>
-      <el-checkbox v-model="show.com" size="small">{{ $t('view.com') }}</el-checkbox>
+    <div class="toolbar" data-test="view-toolbar">
+      <button :title="$t('view.reset')" @click="ctl?.resetView()">⟲</button>
+      <span class="sep">|</span>
+      <button v-for="k in (['base', 'tcp', 'com'] as const)" :key="k" :class="{ off: !show[k] }" :data-test="`view-${k}`" @click="show[k] = !show[k]">
+        {{ $t(`view.${k}`) }}
+      </button>
     </div>
     <div v-if="state === 'loading'" class="overlay">{{ $t('view.loading') }}</div>
     <div v-if="state === 'error'" class="overlay err">{{ $t('view.loadFailed') }}</div>
@@ -63,9 +67,13 @@ watch(show, (s) => {
 <style scoped>
 .vp { position: relative; width: 100%; height: 100%; min-height: 200px; }
 .canvas { position: absolute; inset: 0; }
-.toolbar { position: absolute; left: 10px; bottom: 10px; display: flex; gap: 10px; align-items: center;
-  background: rgba(255,255,255,.9); padding: 4px 10px; border-radius: 6px; }
-.toolbar :deep(.el-checkbox) { margin-right: 0; }
-.overlay { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); color: #fff; background: rgba(0,0,0,.5); padding: 4px 10px; border-radius: 4px; }
+/* v8 mockup .toolbar */
+.toolbar { position: absolute; left: 50%; transform: translateX(-50%); top: 16px; background: #1f2023; color: #e6e7ea;
+  border-radius: 10px; padding: 10px 24px; display: flex; align-items: center; gap: 26px; font-size: 15px; line-height: 20px; }
+.toolbar button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; font-size: 13px; }
+.toolbar button:first-child { font-size: 15px; }
+.toolbar button.off { color: #6f7177; text-decoration: line-through; }
+.toolbar .sep { color: #888; }
+.overlay { position: absolute; top: 64px; left: 50%; transform: translateX(-50%); color: #fff; background: rgba(0,0,0,.5); padding: 4px 10px; border-radius: 4px; }
 .overlay.err { background: rgba(200,40,40,.8); }
 </style>

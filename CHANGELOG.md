@@ -11,6 +11,8 @@ All notable changes to UGClient (formerly Uclient) are documented here. Format: 
 - Joint limit hits and unreachable targets stop the motion and show a dialog.
 
 ### Changed
+- New window shell matching the v8 mockup: a light 3D scene (background #f7f8f9, light grid, fog) fills the window; dark rounded floating panels sit on top (left: robot / TCP offset / payload with connection status and language switch; right: read-only state; bottom: motion bar; top centre: view toolbar with reset view and Base/TCP/COM toggles). The camera frames the robot's reach in the free area between the panels.
+- The light top bar, status footer and the Check/Trajectory/Workspace tabs are removed for now (Trajectory and Workspace were placeholders).
 - Check page now follows the approved v8 mockup: the right panel is a read-only state view (state, mode, payload, mounting, TCP pose, joint angles); joint sliders live in the motion bar.
 
 ### Removed

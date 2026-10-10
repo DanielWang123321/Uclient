@@ -71,12 +71,13 @@
   "info": {
     "state": "State",
     "payload": "Payload",
-    "tcp": "TCP position",
-    "joints": "Joint angles",
+    "tcp": "TCP Position",
+    "joints": "Joint Angle",
     "moving": "Moving",
     "ready": "Ready",
     "stopped": "Stopped",
     "mode": "Mode",
-    "position": "Position"
+    "position": "Position",
+    "readOnly": "read-only"
   }
 }
