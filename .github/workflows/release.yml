@@ -35,12 +35,13 @@ jobs:
         run: |
           pnpm install --frozen-lockfile
           pnpm tauri build --config src-tauri/tauri.bundle.conf.json
-      - name: Draft release with checksums
+      - name: Publish release with checksums
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cd apps/desktop/src-tauri/target/release/bundle
-          sha256sum deb/*.deb > SHA256SUMS.txt
-          gh release create "${GITHUB_REF_NAME}" --draft --title "Uclient ${GITHUB_REF_NAME}" \
-            --notes "Personal project in development; not an official UFACTORY product. Linux x64 only." \
-            deb/*.deb SHA256SUMS.txt
+          cd apps/desktop/src-tauri/target/release/bundle/deb
+          sha256sum *.deb > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+          gh release create "${GITHUB_REF_NAME}" --title "Uclient ${GITHUB_REF_NAME}" \
+            --notes-file "${GITHUB_WORKSPACE}/docs/release-notes/${GITHUB_REF_NAME}.md" \
+            *.deb SHA256SUMS.txt
