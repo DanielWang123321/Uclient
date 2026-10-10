@@ -1,0 +1,13 @@
+{
+  "app": { "title": "Uclient", "personal": "Personal project · not an official UFACTORY product" },
+  "tabs": { "check": "Check", "trajectory": "Trajectory", "workspace": "Workspace" },
+  "robot": { "title": "Robot", "model": "Model", "endEffector": "End effector", "mounting": "Mounting", "floor": "Floor", "none": "None" },
+  "tcp": { "title": "TCP Offset", "hint": "Relative to the flange, mm / °", "apply": "Apply" },
+  "payload": { "title": "TCP Payload", "mass": "Mass (kg)", "com": "COM (mm, flange frame)", "hint": "Total tool + workpiece mass, same as UFACTORY Studio. End-effector models are visual only.", "apply": "Apply" },
+  "status": { "title": "Status", "tcp": "TCP", "flange": "Flange", "reachable": "Reachable", "solutions": "{n} solutions" },
+  "jog": { "title": "Joints", "joint": "Joint", "linear": "Linear", "target": "Target TCP pose", "solve": "Solve IK", "solution": "Solution", "frame": "Pose frame", "home": "Zero" },
+  "torque": { "title": "Joint torque (N·m / %)", "total": "Total", "arm": "Arm", "payload": "Payload", "rated": "Rated", "exportCsv": "Export CSV", "assumption": "Static gravity only; no friction, gearbox efficiency or per-unit calibration." },
+  "view": { "reset": "Reset view", "base": "Base", "tcp": "TCP", "com": "COM", "loading": "Loading model…", "loadFailed": "Failed to load model" },
+  "engine": { "connected": "Connected", "connecting": "Connecting…", "error": "Engine unavailable", "idle": "Not started", "retry": "Retry" },
+  "pending": { "trajectory": "Trajectory playback and τ(t) curves arrive in milestone M3.", "workspace": "Workspace sampling arrives in milestone M4." }
+}

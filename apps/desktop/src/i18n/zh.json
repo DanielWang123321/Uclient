@@ -1,0 +1,13 @@
+{
+  "app": { "title": "Uclient", "personal": "个人项目 · 非 UFACTORY 官方产品" },
+  "tabs": { "check": "校核", "trajectory": "轨迹", "workspace": "工作空间" },
+  "robot": { "title": "机型", "model": "型号", "endEffector": "末端", "mounting": "安装", "floor": "地面", "none": "无" },
+  "tcp": { "title": "TCP Offset", "hint": "相对法兰，mm / °", "apply": "应用" },
+  "payload": { "title": "TCP Payload", "mass": "质量 (kg)", "com": "质心 (mm，法兰坐标系)", "hint": "工具+工件总质量，与 UFACTORY Studio 定义一致；末端模型只用于显示。", "apply": "应用" },
+  "status": { "title": "状态", "tcp": "TCP", "flange": "法兰", "reachable": "可达", "solutions": "{n} 个解" },
+  "jog": { "title": "关节", "joint": "关节", "linear": "直线", "target": "目标 TCP 位姿", "solve": "求解 IK", "solution": "解", "frame": "位姿参考", "home": "归零" },
+  "torque": { "title": "关节扭矩 (N·m / %)", "total": "总计", "arm": "本体", "payload": "负载", "rated": "额定", "exportCsv": "导出 CSV", "assumption": "仅静态重力；不含摩擦、减速器效率和单机标定。" },
+  "view": { "reset": "重置视角", "base": "Base", "tcp": "TCP", "com": "COM", "loading": "正在加载模型…", "loadFailed": "模型加载失败" },
+  "engine": { "connected": "已连接", "connecting": "连接中…", "error": "计算引擎不可用", "idle": "未启动", "retry": "重试" },
+  "pending": { "trajectory": "轨迹回放与 τ(t) 曲线将在 M3 里程碑实现。", "workspace": "工作空间采样将在 M4 里程碑实现。" }
+}

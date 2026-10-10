@@ -1,0 +1,25 @@
+// Neutral theme inspired by (not copied from) UFACTORY Studio (design doc §7).
+:root {
+  --el-color-primary: #1f6fd1;
+  --el-color-primary-light-3: #6299df;
+  --el-color-primary-light-5: #8fb7e8;
+  --el-color-primary-light-7: #bcd4f1;
+  --el-color-primary-light-9: #e9f1fb;
+  --el-color-primary-dark-2: #1959a7;
+  --uc-panel-bg: #ffffff;
+  --uc-app-bg: #eef1f5;
+  --uc-border: #dcdfe6;
+  --uc-ok: #3fb950;
+  --uc-warn: #d29922;
+  --uc-high: #f85149;
+}
+html, body, #app { margin: 0; height: 100%; }
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif;
+  background: var(--uc-app-bg);
+  color: #1f2328;
+  font-size: 13px;
+}
+.num { font-variant-numeric: tabular-nums; font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; }
+.panel-title { font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: #57606a; margin: 10px 0 6px; }
+.hint { color: #6e7781; font-size: 11px; line-height: 1.4; }

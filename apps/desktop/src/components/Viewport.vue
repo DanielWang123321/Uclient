@@ -1,0 +1,71 @@
+<script setup lang="ts">
+import { markRaw, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { SceneController } from '../three/SceneController'
+import { useRobotStore } from '../stores/robot'
+const robot = useRobotStore()
+const host = ref<HTMLDivElement>()
+const state = ref<'idle' | 'loading' | 'ready' | 'error'>('idle')
+const show = ref({ base: true, tcp: true, com: true })
+let ctl: SceneController | null = null
+
+function load() {
+  if (!ctl || !robot.info) return
+  state.value = 'loading'
+  const ee = `link${robot.info.dof}`
+  ctl.loadUrdf(robot.info.visual_urdf_relpath, ee)
+}
+
+onMounted(() => {
+  ctl = markRaw(new SceneController(host.value!))
+  ctl.onLoaded = (ok) => {
+    state.value = ok ? 'ready' : 'error'
+    if (ok && ctl && robot.info) {
+      ctl.setJoints(robot.info.joint_names, robot.q)
+      ctl.setTcp(robot.tcpOffset)
+      ctl.setPayload(robot.payload.mass_kg, robot.payload.com_mm)
+    }
+  }
+  ;(window as unknown as { __uclientScene?: SceneController }).__uclientScene = ctl
+  load()
+})
+onBeforeUnmount(() => {
+  ctl?.dispose()
+  ctl = null
+})
+watch(() => robot.info?.visual_urdf_relpath, load)
+watch(
+  () => [...robot.q],
+  (q) => robot.info && ctl?.setJoints(robot.info.joint_names, q),
+)
+watch(() => robot.tcpOffset, (o) => ctl?.setTcp(o))
+watch(() => robot.payload, (p) => ctl?.setPayload(p.mass_kg, p.com_mm))
+watch(show, (s) => {
+  ctl?.setVisible('base', s.base)
+  ctl?.setVisible('tcp', s.tcp)
+  ctl?.setVisible('com', s.com && robot.payload.mass_kg > 0)
+}, { deep: true })
+</script>
+
+<template>
+  <div class="vp">
+    <div ref="host" class="canvas" data-test="viewport"></div>
+    <div class="toolbar">
+      <el-button size="small" @click="ctl?.resetView()">⟲ {{ $t('view.reset') }}</el-button>
+      <el-checkbox v-model="show.base" size="small">{{ $t('view.base') }}</el-checkbox>
+      <el-checkbox v-model="show.tcp" size="small">{{ $t('view.tcp') }}</el-checkbox>
+      <el-checkbox v-model="show.com" size="small">{{ $t('view.com') }}</el-checkbox>
+    </div>
+    <div v-if="state === 'loading'" class="overlay">{{ $t('view.loading') }}</div>
+    <div v-if="state === 'error'" class="overlay err">{{ $t('view.loadFailed') }}</div>
+  </div>
+</template>
+
+<style scoped>
+.vp { position: relative; width: 100%; height: 100%; min-height: 200px; }
+.canvas { position: absolute; inset: 0; }
+.toolbar { position: absolute; left: 10px; bottom: 10px; display: flex; gap: 10px; align-items: center;
+  background: rgba(255,255,255,.9); padding: 4px 10px; border-radius: 6px; }
+.toolbar :deep(.el-checkbox) { margin-right: 0; }
+.overlay { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); color: #fff; background: rgba(0,0,0,.5); padding: 4px 10px; border-radius: 4px; }
+.overlay.err { background: rgba(200,40,40,.8); }
+</style>
