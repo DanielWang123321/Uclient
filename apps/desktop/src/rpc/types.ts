@@ -78,3 +78,8 @@ export interface RpcErrorObject {
   message: string
   data?: unknown
 }
+
+export interface JogResult {
+  q_deg: number[]
+  tcp_pose: Pose6
+}

@@ -6,6 +6,8 @@ import StatusPanel from '../components/StatusPanel.vue'
 import JogPanel from '../components/JogPanel.vue'
 import TorquePanel from '../components/TorquePanel.vue'
 import Viewport from '../components/Viewport.vue'
+import MotionBar from '../components/MotionBar.vue'
+import InfoPanel from '../components/InfoPanel.vue'
 </script>
 
 <template>
@@ -19,8 +21,13 @@ import Viewport from '../components/Viewport.vue'
       <el-divider />
       <StatusPanel />
     </aside>
-    <main class="center"><Viewport /></main>
+    <main class="center">
+      <div class="vp"><Viewport /></div>
+      <MotionBar />
+    </main>
     <aside class="right">
+      <InfoPanel />
+      <el-divider />
       <JogPanel />
       <el-divider />
       <TorquePanel />
@@ -33,6 +40,7 @@ import Viewport from '../components/Viewport.vue'
 .left, .right { background: var(--uc-panel-bg); overflow-y: auto; padding: 4px 12px 12px; }
 .left { border-right: 1px solid var(--uc-border); }
 .right { border-left: 1px solid var(--uc-border); }
-.center { position: relative; min-width: 0; }
+.center { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.vp { position: relative; flex: 1; min-height: 0; }
 :deep(.el-divider--horizontal) { margin: 10px 0; }
 </style>

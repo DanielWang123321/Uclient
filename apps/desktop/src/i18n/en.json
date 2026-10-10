@@ -83,5 +83,25 @@
     "bio_gripper_g2": "BIO Gripper G2",
     "lite6_gripper": "Lite6 Gripper",
     "lite6_vacuum_gripper": "Lite6 Vacuum Gripper"
+  },
+  "motion": {
+    "speed": "Speed",
+    "home": "Home",
+    "align": "Align",
+    "collapse": "Collapse / expand",
+    "errTitle": "Motion stopped",
+    "errLimit": "Joint limit reached.",
+    "errJointLimit": "J{j} reached its joint limit.",
+    "errUnreachable": "Target unreachable (workspace boundary, singularity or joint limit).",
+    "errAlign": "Cannot point the tool straight down by moving only the last three joints from this pose."
+  },
+  "info": {
+    "state": "State",
+    "payload": "Payload",
+    "tcp": "TCP position",
+    "joints": "Joint angles",
+    "moving": "Moving",
+    "ready": "Ready",
+    "stopped": "Stopped"
   }
 }

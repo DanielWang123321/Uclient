@@ -7,10 +7,6 @@ const robot = useRobotStore()
 const target = ref<number[]>([830, 0, 200, -180, 0, 0])
 const frame = ref<'tcp' | 'flange'>('tcp')
 const labels = ['X', 'Y', 'Z', 'R', 'P', 'Y']
-function lim(i: number): [number, number] {
-  const l = robot.info?.limits_deg[i] ?? [-360, 360]
-  return [Math.max(l[0], -360), Math.min(l[1], 360)]
-}
 function useCurrent() {
   const p = frame.value === 'tcp' ? robot.fk?.tcp_pose : robot.fk?.flange_pose
   if (p) target.value = p.map((v) => Number(v.toFixed(3)))
@@ -19,29 +15,6 @@ function useCurrent() {
 
 <template>
   <div>
-    <div class="panel-title">{{ $t('jog.title') }}</div>
-    <div v-for="(n, i) in robot.info?.joint_names ?? []" :key="n" class="joint">
-      <span class="jn">J{{ i + 1 }}</span>
-      <el-slider
-        :model-value="robot.q[i]"
-        :min="lim(i)[0]"
-        :max="lim(i)[1]"
-        :step="0.1"
-        :show-tooltip="false"
-        size="small"
-        @input="(v: number | number[]) => robot.setJoint(i, Number(v))"
-      />
-      <el-input-number
-        :model-value="robot.q[i]"
-        size="small"
-        :controls="false"
-        :precision="3"
-        class="num"
-        @change="(v: number | undefined) => robot.setJoint(i, Number(v ?? 0))"
-      />
-    </div>
-    <el-button size="small" text @click="robot.setQ(robot.info?.default_q_deg ?? [])">{{ $t('jog.home') }}</el-button>
-
     <div class="panel-title">{{ $t('jog.target') }}</div>
     <div class="grid6">
       <label v-for="(l, i) in labels" :key="i">
@@ -77,9 +50,6 @@ function useCurrent() {
 </template>
 
 <style scoped>
-.joint { display: grid; grid-template-columns: 24px 1fr 78px; align-items: center; gap: 8px; }
-.jn { color: #57606a; font-weight: 600; }
-.joint :deep(.el-input-number) { width: 78px; }
 .grid6 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px 6px; }
 .grid6 label { display: flex; align-items: center; gap: 4px; }
 .grid6 span { width: 12px; color: #57606a; }

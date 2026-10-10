@@ -83,5 +83,25 @@
     "bio_gripper_g2": "BIO 机械爪 G2",
     "lite6_gripper": "Lite6 机械爪",
     "lite6_vacuum_gripper": "Lite6 真空吸头"
+  },
+  "motion": {
+    "speed": "速度",
+    "home": "回零",
+    "align": "对齐",
+    "collapse": "收起 / 展开",
+    "errTitle": "运动已停止",
+    "errLimit": "已到达关节限位。",
+    "errJointLimit": "J{j} 已到达关节限位。",
+    "errUnreachable": "目标不可达（超出工作空间、接近奇异点或关节限位）。",
+    "errAlign": "从当前姿态只转动最后三个关节，无法让末端朝下。"
+  },
+  "info": {
+    "state": "状态",
+    "payload": "负载",
+    "tcp": "TCP 位置",
+    "joints": "关节角度",
+    "moving": "运动中",
+    "ready": "就绪",
+    "stopped": "已停止"
   }
 }
