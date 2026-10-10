@@ -18,7 +18,7 @@ DEST = ROOT / "third_party" / "ufactory_genesis"
 
 def pin() -> dict[str, str]:
     data = tomllib.loads((ROOT / "core" / "pyproject.toml").read_text(encoding="utf-8"))
-    return data["tool"]["uclient"]["ufactory_genesis"]
+    return data["tool"]["ugclient"]["ufactory_genesis"]
 
 
 def run(*args: str, cwd: Path | None = None) -> str:

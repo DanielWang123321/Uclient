@@ -1,15 +1,15 @@
 [package]
-name = "uclient"
+name = "ugclient"
 version = "0.1.0"
-description = "Uclient - kinematics/dynamics desktop client for UFACTORY arms (personal project, not an official UFACTORY product)"
+description = "UGClient - kinematics/dynamics desktop client for UFACTORY arms (personal project, not an official UFACTORY product)"
 authors = ["Daniel Wang"]
 license = "MIT"
-repository = "https://github.com/DanielWang123321/Uclient"
+repository = "https://github.com/DanielWang123321/ugclient"
 edition = "2021"
 rust-version = "1.90"
 
 [lib]
-name = "uclient_lib"
+name = "ugclient_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]

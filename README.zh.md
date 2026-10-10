@@ -1,10 +1,12 @@
-# Uclient
+# UGClient
 
-> **Uclient 目前是个人项目，处于开发阶段，不是 UFACTORY 官方产品，与 UFACTORY 无隶属或背书关系。**
+**UGClient = UFACTORY Genesis Client**（原名 *Uclient*）。旧版 Uclient 项目文件（`*.uclient.json`）仍可打开。
+
+> **UGClient 目前是个人项目，处于开发阶段，不是 UFACTORY 官方产品，与 UFACTORY 无隶属或背书关系。**
 
 [English](README.md)
 
-Uclient 是一个开源桌面客户端（Tauri v2 + Vue 3），基于 [`ufactory_genesis`](https://github.com/xArm-Developer/ufactory_genesis) 和 [Pinocchio](https://github.com/stack-of-tasks/pinocchio)，为 UFACTORY 机械臂提供**运动学、动力学计算和 3D 可视化**。术语和单位与 UFACTORY Studio 保持一致（mm / °、TCP Offset、TCP Payload）。不连接真机，不做强化学习。
+UGClient 是一个开源桌面客户端（Tauri v2 + Vue 3），基于 [`ufactory_genesis`](https://github.com/xArm-Developer/ufactory_genesis) 和 [Pinocchio](https://github.com/stack-of-tasks/pinocchio)，为 UFACTORY 机械臂提供**运动学、动力学计算和 3D 可视化**。术语和单位与 UFACTORY Studio 保持一致（mm / °、TCP Offset、TCP Payload）。不连接真机，不做强化学习。
 
 支持机型：**UF850、xArm5/6/7（仅 `_1305` 版本）、Lite6**。平台：**Linux**（Windows 10+ 打包计划在 M5 里程碑加入；暂不支持 macOS）。
 
@@ -43,7 +45,7 @@ python scripts/fetch_ufg.py
 cd apps/desktop && pnpm install && pnpm test
 
 # 3. 用开发版引擎运行桌面应用
-UCLIENT_CORE_CMD="$PWD/../../.venv/bin/python -m uclient_core" pnpm tauri dev
+UGCLIENT_CORE_CMD="$PWD/../../.venv/bin/python -m ugclient_core" pnpm tauri dev
 
 # 4. 打包（deb）
 cd ../.. && .venv/bin/python scripts/build_sidecar.py

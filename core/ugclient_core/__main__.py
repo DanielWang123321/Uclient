@@ -8,10 +8,10 @@ import sys
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(prog="uclient-core")
+    ap = argparse.ArgumentParser(prog="ugclient-core")
     ap.add_argument("--host", default="127.0.0.1")
     ap.add_argument("--port", type=int, default=0)
-    ap.add_argument("--token", default=os.environ.get("UCLIENT_TOKEN"))
+    ap.add_argument("--token", default=os.environ.get("UGCLIENT_TOKEN"))
     ap.add_argument("--version", action="store_true")
     a = ap.parse_args(argv)
     logging.basicConfig(level=logging.INFO, stream=sys.stderr, format="%(levelname)s %(name)s: %(message)s")

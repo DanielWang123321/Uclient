@@ -1,10 +1,12 @@
-# Uclient
+# UGClient
 
-> **Uclient is currently a personal project in development. It is not an official UFACTORY product and is not affiliated with or endorsed by UFACTORY.**
+**UGClient = UFACTORY Genesis Client** (formerly *Uclient*). Project files from Uclient (`*.uclient.json`) still open.
+
+> **UGClient is currently a personal project in development. It is not an official UFACTORY product and is not affiliated with or endorsed by UFACTORY.**
 
 [中文说明](README.zh.md)
 
-Uclient is an open-source desktop client (Tauri v2 + Vue 3) for **kinematics, dynamics and 3D visualization** of UFACTORY robot arms, built on top of [`ufactory_genesis`](https://github.com/xArm-Developer/ufactory_genesis) and [Pinocchio](https://github.com/stack-of-tasks/pinocchio). Its terms and units follow UFACTORY Studio (mm / °, TCP Offset, TCP Payload) so Studio users feel at home. It does not connect to real robots and does not do reinforcement learning.
+UGClient is an open-source desktop client (Tauri v2 + Vue 3) for **kinematics, dynamics and 3D visualization** of UFACTORY robot arms, built on top of [`ufactory_genesis`](https://github.com/xArm-Developer/ufactory_genesis) and [Pinocchio](https://github.com/stack-of-tasks/pinocchio). Its terms and units follow UFACTORY Studio (mm / °, TCP Offset, TCP Payload) so Studio users feel at home. It does not connect to real robots and does not do reinforcement learning.
 
 Supported models: **UF850, xArm5/6/7 (`_1305` revision only), Lite6**. Platform: **Linux** (Windows 10+ packaging is planned for milestone M5; macOS is not supported).
 
@@ -43,20 +45,20 @@ python scripts/fetch_ufg.py
 cd apps/desktop && pnpm install && pnpm test
 
 # 3. Run the desktop app against the dev sidecar
-UCLIENT_CORE_CMD="$PWD/../../.venv/bin/python -m uclient_core" pnpm tauri dev
+UGCLIENT_CORE_CMD="$PWD/../../.venv/bin/python -m ugclient_core" pnpm tauri dev
 
 # 4. Package (deb)
 cd ../.. && .venv/bin/python scripts/build_sidecar.py   # PyInstaller onedir + smoke test
 cd apps/desktop && pnpm tauri build --config src-tauri/tauri.bundle.conf.json
 ```
 
-You can also run the frontend in a browser: start `python -m uclient_core`, then open `http://localhost:1420/?port=<port>&token=<token>` using the handshake line it prints.
+You can also run the frontend in a browser: start `python -m ugclient_core`, then open `http://localhost:1420/?port=<port>&token=<token>` using the handshake line it prints.
 
 ## Repository layout
 
 ```
 apps/desktop/        Vue 3 + TS + Element Plus frontend, three.js viewport, Tauri shell (src-tauri/)
-core/uclient_core/   Python sidecar: server, api/, units.py, backend/ adapter layer
+core/ugclient_core/   Python sidecar: server, api/, units.py, backend/ adapter layer
 schema/api.v1.json   JSON-RPC API description
 scripts/             fetch_ufg.py, sync_assets.py, build_sidecar.py
 docs/DESIGN.md       Design document (Chinese)

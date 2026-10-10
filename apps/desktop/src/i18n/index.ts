@@ -5,7 +5,7 @@ import zh from './zh.json'
 export type Locale = 'zh' | 'en'
 
 export function detectLocale(): Locale {
-  const saved = typeof localStorage !== 'undefined' ? localStorage.getItem('uclient.locale') : null
+  const saved = typeof localStorage !== 'undefined' ? (localStorage.getItem('ugclient.locale') ?? localStorage.getItem('uclient.locale')) : null
   if (saved === 'zh' || saved === 'en') return saved
   return typeof navigator !== 'undefined' && navigator.language.startsWith('zh') ? 'zh' : 'en'
 }

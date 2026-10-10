@@ -6,7 +6,7 @@ import sys
 
 def test_no_torch_or_genesis():
     code = (
-        "import sys, uclient_core.rpc, uclient_core.server; from uclient_core.backend import factory;"
+        "import sys, ugclient_core.rpc, ugclient_core.server; from ugclient_core.backend import factory;"
         "factory.catalog().info('uf850');"
         "bad=[m for m in sys.modules if m.split('.')[0] in ('torch','genesis')]; print(bad); sys.exit(1 if bad else 0)"
     )

@@ -8,7 +8,7 @@ from websockets.sync.client import connect
 
 
 def test_sidecar_handshake_and_rpc():
-    p = subprocess.Popen([sys.executable, "-m", "uclient_core"], stdout=subprocess.PIPE, text=True)
+    p = subprocess.Popen([sys.executable, "-m", "ugclient_core"], stdout=subprocess.PIPE, text=True)
     try:
         hs = json.loads(p.stdout.readline())
         assert isinstance(hs["port"], int) and len(hs["token"]) == 32

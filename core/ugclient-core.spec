@@ -1,4 +1,4 @@
-# PyInstaller spec for the uclient-core sidecar (--onedir). Build via scripts/build_sidecar.py.
+# PyInstaller spec for the ugclient-core sidecar (--onedir). Build via scripts/build_sidecar.py.
 # ufactory_genesis resolves assets relative to its package (PROJECT_ROOT = parents[2] of
 # ufactory/robots/registry.py), so pyproject.toml + assets/ are placed at the bundle root (_internal/).
 import os
@@ -8,7 +8,7 @@ from PyInstaller.utils.hooks import collect_submodules
 
 ROOT = Path(SPECPATH).resolve().parent
 UFG = ROOT / "third_party" / "ufactory_genesis"
-BUILD_EXTRA = Path(os.environ.get("UCLIENT_BUILD_EXTRA", ROOT / "build" / "sidecar-extra"))
+BUILD_EXTRA = Path(os.environ.get("UGCLIENT_BUILD_EXTRA", ROOT / "build" / "sidecar-extra"))
 
 datas = [(str(UFG / "pyproject.toml"), "."), (str(UFG / "NOTICE"), "."), (str(UFG / "LICENSE"), ".")]
 for f in (BUILD_EXTRA / "UFG_COMMIT", BUILD_EXTRA / "UFG_VERSION"):
@@ -26,7 +26,7 @@ hiddenimports = collect_submodules("ufactory.robots") + collect_submodules("ufac
     "ufactory.kinematics.tcp_offset",
     "ufactory.safety.models",
     "websockets.asyncio.server",
-    "uclient_core.server",
+    "ugclient_core.server",
     "coal",
 ]
 
@@ -40,5 +40,5 @@ a = Analysis(
     noarchive=False,
 )
 pyz = PYZ(a.pure)
-exe = EXE(pyz, a.scripts, [], exclude_binaries=True, name="uclient-core", console=True, strip=False, upx=False)
-coll = COLLECT(exe, a.binaries, a.datas, strip=False, upx=False, name="uclient-core")
+exe = EXE(pyz, a.scripts, [], exclude_binaries=True, name="ugclient-core", console=True, strip=False, upx=False)
+coll = COLLECT(exe, a.binaries, a.datas, strip=False, upx=False, name="ugclient-core")

@@ -1,4 +1,4 @@
-//! Sidecar lifecycle: spawn `uclient-core`, read the `{port, token}` handshake from the
+//! Sidecar lifecycle: spawn `ugclient-core`, read the `{port, token}` handshake from the
 //! first stdout line, hand it to the frontend, restart on crash (max 3 times).
 use serde::{Deserialize, Serialize};
 use std::io::{BufRead, BufReader};
@@ -38,26 +38,26 @@ struct Inner {
 pub struct Engine(Arc<(Mutex<Inner>, Condvar)>);
 
 /// Command used to start the engine.
-/// 1. `UCLIENT_CORE_CMD` (whitespace separated, e.g. `.venv/bin/python -m uclient_core`) for development;
+/// 1. `UGCLIENT_CORE_CMD` (whitespace separated, e.g. `.venv/bin/python -m ugclient_core`) for development;
 /// 2. the bundled PyInstaller onedir build in the resource dir.
 fn engine_command(app: &AppHandle) -> Result<Command, String> {
-    if let Ok(cmd) = std::env::var("UCLIENT_CORE_CMD") {
+    if let Ok(cmd) = std::env::var("UGCLIENT_CORE_CMD") {
         let mut parts = cmd.split_whitespace();
-        let prog = parts.next().ok_or("UCLIENT_CORE_CMD is empty")?;
+        let prog = parts.next().ok_or("UGCLIENT_CORE_CMD is empty")?;
         let mut c = Command::new(prog);
         c.args(parts);
         return Ok(c);
     }
     let exe = if cfg!(windows) {
-        "uclient-core.exe"
+        "ugclient-core.exe"
     } else {
-        "uclient-core"
+        "ugclient-core"
     };
     let res: PathBuf = app.path().resource_dir().map_err(|e| e.to_string())?;
-    let path = res.join("uclient-core").join(exe);
+    let path = res.join("ugclient-core").join(exe);
     if !path.is_file() {
         return Err(format!(
-            "engine not found at {} (set UCLIENT_CORE_CMD in development)",
+            "engine not found at {} (set UGCLIENT_CORE_CMD in development)",
             path.display()
         ));
     }

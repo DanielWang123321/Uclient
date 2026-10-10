@@ -1,20 +1,20 @@
-Uclient
+UGClient
 Copyright (c) 2026 Daniel Wang
 
-Uclient is a personal project in development. It is NOT an official UFACTORY
+UGClient is a personal project in development. It is NOT an official UFACTORY
 product and is not affiliated with or endorsed by UFACTORY.
 
-Uclient's own source code is licensed under the MIT License (see LICENSE).
+UGClient's own source code is licensed under the MIT License (see LICENSE).
 
 ================================================================================
-Robot model assets (redistributed in Uclient builds)
+Robot model assets (redistributed in UGClient builds)
 ================================================================================
 
-Uclient builds include robot description files (URDF), Draco-compressed visual
+UGClient builds include robot description files (URDF), Draco-compressed visual
 meshes (GLB), kinematics YAML and runtime configuration taken, at build time,
 from ufactory_genesis (https://github.com/xArm-Developer/ufactory_genesis,
 MIT License, pinned commit recorded in core/pyproject.toml). These files are
-derivatives modified by ufactory_genesis; Uclient redistributes them unchanged
+derivatives modified by ufactory_genesis; UGClient redistributes them unchanged
 and does not vendor them in this git repository.
 
 Attribution, as stated in the ufactory_genesis NOTICE:
@@ -48,8 +48,8 @@ Trademarks
 ================================================================================
 
 xArm, UF850, Lite6, UFACTORY, and related names are trademarks of their
-respective owners. Uclient uses those names only to describe hardware
-compatibility; this does not imply endorsement. Uclient does not use UFACTORY
+respective owners. UGClient uses those names only to describe hardware
+compatibility; this does not imply endorsement. UGClient does not use UFACTORY
 logos or icons, and its interface is only loosely inspired by UFACTORY Studio.
 
 Third-party software licenses: see THIRD_PARTY_LICENSES.md.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the uclient-core sidecar with PyInstaller (--onedir) into dist-sidecar/uclient-core/,
+"""Build the ugclient-core sidecar with PyInstaller (--onedir) into dist-sidecar/ugclient-core/,
 then smoke-test it: handshake, token auth and the U1 golden case over WebSocket."""
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 UFG = ROOT / "third_party" / "ufactory_genesis"
 EXTRA = ROOT / "build" / "sidecar-extra"
 DIST = ROOT / "dist-sidecar"
-EXE = DIST / "uclient-core" / ("uclient-core.exe" if sys.platform == "win32" else "uclient-core")
+EXE = DIST / "ugclient-core" / ("ugclient-core.exe" if sys.platform == "win32" else "ugclient-core")
 
 
 def build() -> None:
@@ -25,7 +25,7 @@ def build() -> None:
     (EXTRA / "UFG_VERSION").write_text(metadata.version("genesis-ufactory") + "\n")
     subprocess.run(
         [sys.executable, "-m", "PyInstaller", "--noconfirm", "--clean", "--distpath", str(DIST),
-         "--workpath", str(ROOT / "build" / "pyinstaller"), str(ROOT / "core" / "uclient-core.spec")],
+         "--workpath", str(ROOT / "build" / "pyinstaller"), str(ROOT / "core" / "ugclient-core.spec")],
         check=True,
     )
 

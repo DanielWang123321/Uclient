@@ -1,4 +1,4 @@
-# Uclient 设计文档 v0.3（草案）
+# UGClient 设计文档 v0.3（草案）
 
 > 状态：草案，v0.1 的全部待确认问题均已答复并落实到正文
 > 依赖库：`ufactory_genesis`（MIT，现托管于 `xArm-Developer/ufactory_genesis`，本文基于 commit `be49519`，v0.3.x）
@@ -8,11 +8,12 @@
 
 | 版本 | 日期 | 变更 |
 |---|---|---|
+| v0.3.4 | 2026-10-10 | 产品更名为 UGClient（UFACTORY Genesis Client，原 Uclient）：仓库 `DanielWang123321/ugclient`，deb 包/二进制 `ugclient`，Python 包 `ugclient_core`，标识符 `io.github.danielwang123321.ugclient`，项目文件 `*.ugclient.json`（仍兼容 `*.uclient.json`）。 |
 | v0.3.3 | 2026-10-10 | ufactory_genesis 锁定到 `be49519`（官方最大关节扭矩）；“额定”统一改称“最大扭矩”（UI、CSV 列 `max_torque_nm`、文档）；U1 利用率 J2 19.6%、J3 12.6%，扭矩不变。 |
 | v0.3.2 | 2026-10-10 | 末端默认 TCP：G2 172 mm、Lite6 夹爪 83.6 mm 取 URDF tcp 关节；BIO G2 [159.5,0,59.5]、Lite6 吸头 z 61.1 mm 为官方常量；`tool_tip_offset_z_m` 不是 TCP。 |
 | v0.3.1 | 2026-10-10 | Linux 只打 deb 包，取消 AppImage（用户决定）；CI/发布流程、README 同步更新。 |
 | v0.3 | 2026-10-10 | 资源 `assets/urdf` 按 `ufactory_genesis` NOTICE 署名直接随包分发，不再单独核验；v0.1 只打 Linux 包（ubuntu-22.04：AppImage + deb），Windows 10+ 打包移到后续里程碑，代码保持跨平台；最大关节扭矩运行时从 `ufactory_genesis` 读取、不在本地硬编码，并锁定即将发布的官方最大扭矩值版本；xArm 系列只支持 `_1305`；所有待确认问题已关闭。 |
-| v0.2 | 2026-10-10 | 确认个人仓库 `DanielWang123321/Uclient`，README 必须声明“个人项目、非 UFACTORY 官方产品”；校核输入位姿默认 TCP（已叠加 TCP Offset）；负载定义与 UFACTORY Studio 完全一致；前端由 Svelte 5 改为 Vue 3 + TypeScript + Vite + Element Plus，曲线库选 uPlot；暂不修改 `ufactory_genesis`，负载感知的重力/RNEA、纯 Pinocchio IK、FK/Jacobian 都在 sidecar 中实现，经适配层 `backend/` 隔离，上游有接口后再切换；平台收窄为 Linux + Windows 10+，移除 macOS 构建和签名公证；更新待确认问题。 |
+| v0.2 | 2026-10-10 | 确认个人仓库 `DanielWang123321/UGClient`，README 必须声明“个人项目、非 UFACTORY 官方产品”；校核输入位姿默认 TCP（已叠加 TCP Offset）；负载定义与 UFACTORY Studio 完全一致；前端由 Svelte 5 改为 Vue 3 + TypeScript + Vite + Element Plus，曲线库选 uPlot；暂不修改 `ufactory_genesis`，负载感知的重力/RNEA、纯 Pinocchio IK、FK/Jacobian 都在 sidecar 中实现，经适配层 `backend/` 隔离，上游有接口后再切换；平台收窄为 Linux + Windows 10+，移除 macOS 构建和签名公证；更新待确认问题。 |
 | v0.1 | 2026-10-10 | 初稿。 |
 
 ---
@@ -20,7 +21,7 @@
 ## 1. 目标与非目标
 
 **目标**
-- G1 桌面客户端，基于 Tauri v2，开源（MIT），托管在个人仓库 `github.com/DanielWang123321/Uclient`。v0.1 只发布 **Linux** 安装包；代码保持跨平台，**Windows 10+** 打包在后续里程碑（M5）加入；macOS 暂不支持。
+- G1 桌面客户端，基于 Tauri v2，开源（MIT），托管在个人仓库 `github.com/DanielWang123321/ugclient`。v0.1 只发布 **Linux** 安装包；代码保持跨平台，**Windows 10+** 打包在后续里程碑（M5）加入；macOS 暂不支持。
 - G2 对 UFACTORY 机械臂（UF850、xArm5/6/7、Lite6，可选 Gripper G2 / Bio Gripper G2 / Lite6 Gripper / Lite6 Vacuum）提供：正逆运动学（FK/IK）、静力/逆动力学扭矩、可达性与工作空间、轨迹回放与扭矩曲线、CSV/报告导出。
 - G3 3D 可视化：直接渲染 `ufactory_genesis/assets/urdf` 中的 URDF + Draco GLB。
 - G4 交互和单位约定对齐 UFACTORY Studio（mm/°、TCP Offset/TCP Payload 定义一致），让 Studio 用户零学习成本。
@@ -32,7 +33,7 @@
 - 不做 Blockly 编程、不做 Studio 的完整替代品。
 - MVP 不打包 Genesis / PyTorch 物理仿真（后期作为可选模块）。
 - 不做碰撞检测和路径规划（后期可考虑 `coal`）。
-- 现阶段不修改 `ufactory_genesis`：缺失的接口全部在 Uclient sidecar 内实现（§9）。
+- 现阶段不修改 `ufactory_genesis`：缺失的接口全部在 UGClient sidecar 内实现（§9）。
 - v0.1 不提供 Windows 安装包；暂不支持 macOS。
 - 不支持 xArm 旧版本机型：xArm5/6/7 只支持 `_1305` 版本（即 `ROBOT_PROFILES` 中的 `xarm5_1305`/`xarm6_1305`/`xarm7_1305`），另有 UF850、Lite6。
 
@@ -57,7 +58,7 @@ q = `[0, −86.401, −144.409, −180, 58.007, −180]°`，τ ≈ J2 74.958 N�
 | 模块 | MVP（v0.1） | v0.2 | 后续 |
 |---|---|---|---|
 | 机型 | uf850 / xarm5/6/7 / lite6（来自 `ufactory.robots.registry.ROBOT_PROFILES`）| 末端：G2、Bio G2、Lite6 Gripper/Vacuum 的外观 | 安装方式（壁挂/倒装 → 改重力向量）|
-| TCP | TCP Offset `[x,y,z,r,p,y]`（mm/°，相对法兰）| 末端默认 TCP 取自 ufactory_genesis 组合 URDF 的 tcp 关节（G2 172 mm、Lite6 夹爪 83.6 mm、BIO G2 [159.5, 0, 59.5, 0, 0, 0]（维护者提供的 UFACTORY 官方值，Uclient 内常量 `OFFICIAL_TCP_OFFSETS`）、Lite6 吸头 [0, 0, 61.1, 0, 0, 0]（官方值，同为 `OFFICIAL_TCP_OFFSETS` 常量））| 5 点标定导入 |
+| TCP | TCP Offset `[x,y,z,r,p,y]`（mm/°，相对法兰）| 末端默认 TCP 取自 ufactory_genesis 组合 URDF 的 tcp 关节（G2 172 mm、Lite6 夹爪 83.6 mm、BIO G2 [159.5, 0, 59.5, 0, 0, 0]（维护者提供的 UFACTORY 官方值，UGClient 内常量 `OFFICIAL_TCP_OFFSETS`）、Lite6 吸头 [0, 0, 61.1, 0, 0, 0]（官方值，同为 `OFFICIAL_TCP_OFFSETS` 常量））| 5 点标定导入 |
 | 负载 | mass + COM（与 Studio 完全一致：工具+工件总质量，COM 相对法兰）| 惯量张量（可选）| 负载辨识数据导入 |
 | 关节点动 | 滑块 + 数值输入，限位显示 | 键盘步进 | — |
 | 笛卡尔点动 | 基坐标系 / 工具坐标系 XYZ RPY 步进（走 IK）| 3D 拖拽 TCP gizmo | — |
@@ -79,7 +80,7 @@ flowchart LR
     UI["前端 WebView<br/>Vue 3 + TS + Element Plus<br/>three.js + urdf-loader"]
     RS["Rust 壳 (tauri v2)<br/>sidecar 生命周期<br/>文件对话框 / 项目 IO<br/>端口+token 下发"]
   end
-  SC["uclient-core sidecar<br/>Python 3.12 (PyInstaller --onedir)<br/>backend 适配层 → ufactory_genesis(只读用) + pinocchio"]
+  SC["ugclient-core sidecar<br/>Python 3.12 (PyInstaller --onedir)<br/>backend 适配层 → ufactory_genesis(只读用) + pinocchio"]
   ASSETS[("resources/assets/urdf<br/>URDF + visual_glb")]
   GEN["(可选) genesis-module<br/>torch + genesis"]
 
@@ -123,7 +124,7 @@ flowchart LR
 
 | 方法 | 参数 | 返回 |
 |---|---|---|
-| `system.hello` | `{token, client_version}` | 版本信息，`capabilities:["kin","dyn","traj","workspace"]`，`backend:{kin:"uclient",dyn:"uclient"}`（以后切到上游时为 `"ufactory_genesis"`）|
+| `system.hello` | `{token, client_version}` | 版本信息，`capabilities:["kin","dyn","traj","workspace"]`，`backend:{kin:"ugclient",dyn:"ugclient"}`（以后切到上游时为 `"ufactory_genesis"`）|
 | `system.shutdown` | — | `{ok}` |
 | `robot.list` | — | `[{key, robot_name, dof, end_effectors:["none","gripper_g2",...]}]`（来自 `ROBOT_PROFILES`、`robot_cli_choices()`）|
 | `robot.load` | `{robot, end_effector, calibration?:{yaml_path}|null, mounting?:{gravity_dir:[0,0,-1]}}` | `{session_id, dof, joint_names, limits_deg:[[lo,hi]], effort_limits_nm, visual_urdf_relpath, home_q_deg, default_q_deg}` |
@@ -162,11 +163,11 @@ flowchart LR
 
 ## 6. 数据模型
 
-### 6.1 项目文件 `*.uclient.json`（UTF-8，`schema_version` 整数，向后迁移函数在前端 `src/lib/project/migrate.ts`）
+### 6.1 项目文件 `*.ugclient.json`（UTF-8，`schema_version` 整数，向后迁移函数在前端 `src/lib/project/migrate.ts`）
 ```json
 {
   "schema_version": 1,
-  "app": {"name": "Uclient", "version": "0.1.0"},
+  "app": {"name": "UGClient", "version": "0.1.0"},
   "core": {"ufactory_genesis_commit": "be49519", "pinocchio": "4.0.0"},
   "robot": {"key": "uf850", "end_effector": "none", "calibration": null,
             "mounting": {"gravity_dir": [0, 0, -1]}},
@@ -189,12 +190,12 @@ flowchart LR
 
 ## 7. 界面布局（参照 UFACTORY Studio Live Control）
 
-Studio 的 Live Control 页：中间 3D 视图（Reset Perspective、Base/TCP 坐标系开关、Plot/Clean Path），侧边状态信息（Model、Payload、Mounting、TCP Coordinate、Joint Angle），控制区有关节运动和直线运动（Base/Tool 坐标系，XYZ 单位 mm，RPY 单位 °）。Settings > TCP 里 Payload 是 `[kg, Cx, Cy, Cz]`，Offset 是 `[x,y,z,r,p,y]`，都相对法兰中心。Uclient 沿用这些术语和定义。
+Studio 的 Live Control 页：中间 3D 视图（Reset Perspective、Base/TCP 坐标系开关、Plot/Clean Path），侧边状态信息（Model、Payload、Mounting、TCP Coordinate、Joint Angle），控制区有关节运动和直线运动（Base/Tool 坐标系，XYZ 单位 mm，RPY 单位 °）。Settings > TCP 里 Payload 是 `[kg, Cx, Cy, Cz]`，Offset 是 `[x,y,z,r,p,y]`，都相对法兰中心。UGClient 沿用这些术语和定义。
 
 ### 7.1 主界面（Live / 姿态校核）
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [U] Uclient  项目: 850_check.uclient.json ▾   │ 校核 │ 轨迹 │ 工作空间 │  ⚙ 中/EN │
+│ [U] UGClient  项目: 850_check.ugclient.json ▾   │ 校核 │ 轨迹 │ 工作空间 │  ⚙ 中/EN │
 ├───────────────┬──────────────────────────────────────────┬───────────────────┤
 │ 机型          │                                          │ 关节  ●关节 ○直线 │
 │ [UF850     ▾] │                                          │ J1 [====|====] 0.0│
@@ -248,23 +249,23 @@ Studio 的 Live Control 页：中间 3D 视图（Reset Perspective、Base/TCP �
 
 ## 9. 与 ufactory_genesis 的关系：sidecar 内实现 + 适配层
 
-**决定：现阶段不修改 `ufactory_genesis`。** 它缺的接口全部在 Uclient sidecar 里实现，放在一个薄适配层后面，等上游以后自己加上这些接口时再切换过去。
+**决定：现阶段不修改 `ufactory_genesis`。** 它缺的接口全部在 UGClient sidecar 里实现，放在一个薄适配层后面，等上游以后自己加上这些接口时再切换过去。
 
 调研结论（仓库现状）：
 - 动力学只有 `ufactory/dynamics/reference.py::PinocchioReference`（`mass_matrix` / `gravity` / `rnea`），直接 `buildModelFromUrdf`，**没有负载/TCP 质量接口**，也没有 frame/FK/Jacobian 封装。之前 850 算例是在仓库外给 `link6` 追加惯性体实现的。
 - IK 只有 Genesis/torch 版本（`ufactory/kinematics/genesis.py::solve_link6_ik`、`ufactory/trajectory/ik.py`），**没有纯 Pinocchio 的 IK**。
 - TCP 相关只有位姿换算：`ufactory/kinematics/tcp_offset.py`（`pose_to_matrix`、`pose_flange_to_tcp`、`pose_tcp_to_flange`、`rpy_matrix`），只依赖 numpy，可直接调用。
 - 机型和资源：`ufactory/robots/registry.py`（`RobotModelSpec`、`ROBOT_PROFILES`、`get_robot_profile`）、`ufactory/robots/paths.py`（`robot_urdf`、`robot_visual_glb_urdf`）、`ufactory/config/assets.py::RepositoryAssetStore`。已验证 `import ufactory.robots, ufactory.kinematics.tcp_offset, ufactory.config.loader` 不会拉起 torch/genesis。
-- 最大关节扭矩（UFACTORY 官方关节参数：https://docs.supportarticle.ufactory.cc/zhHans/support_articles/hardware/ufactory-joint-parameters.html；Lite6 J4/J6 为直驱无减速器，1.365 N·m 正确）：`assets/configs/runtime/robots/*.yaml` 的 `arm.effort_limits_nm`，通过 `ufactory.config.loader.load_runtime_config` 读取。**Uclient 在运行时从 `ufactory_genesis` 读取，不在本地硬编码或复制任何最大扭矩值**（`catalog_ufg.py` 读取后经 `robot.load.effort_limits_nm` 下发，前端只显示）。自 `ufactory_genesis` commit `be49519`（PR #3，未打 tag）起这些值为 UFACTORY 官方关节扭矩限值，Uclient 已锁定到该 commit（uf850 `[382.5,382.5,243.525,117.3,38.25,38.25]`；此前 `60fe926` 的 `[200,200,90,68,19,19]` 为开发用值）。
+- 最大关节扭矩（UFACTORY 官方关节参数：https://docs.supportarticle.ufactory.cc/zhHans/support_articles/hardware/ufactory-joint-parameters.html；Lite6 J4/J6 为直驱无减速器，1.365 N·m 正确）：`assets/configs/runtime/robots/*.yaml` 的 `arm.effort_limits_nm`，通过 `ufactory.config.loader.load_runtime_config` 读取。**UGClient 在运行时从 `ufactory_genesis` 读取，不在本地硬编码或复制任何最大扭矩值**（`catalog_ufg.py` 读取后经 `robot.load.effort_limits_nm` 下发，前端只显示）。自 `ufactory_genesis` commit `be49519`（PR #3，未打 tag）起这些值为 UFACTORY 官方关节扭矩限值，UGClient 已锁定到该 commit（uf850 `[382.5,382.5,243.525,117.3,38.25,38.25]`；此前 `60fe926` 的 `[200,200,90,68,19,19]` 为开发用值）。
 - 标定：`ufactory/kinematics/calibration.py::build_calibrated_urdf`、`load_kinematics_calibration`（标定 YAML 在 `assets/urdf/<robot>/kinematics/{default,user}`）。
 
-**适配层设计（`core/uclient_core/backend/`）**
+**适配层设计（`core/ugclient_core/backend/`）**
 ```
 backend/
 ├── interfaces.py      # Protocol：KinematicsBackend、DynamicsBackend、RobotCatalog
 ├── catalog_ufg.py     # RobotCatalog 实现：只读调用 ufactory.robots / config.loader（上游已有）
-├── kin_pinocchio.py   # Uclient 自带：fk、jacobian、ik_dls、ik_all（多初值+去重+分支标注）、TCP frame
-├── dyn_pinocchio.py   # Uclient 自带：负载感知 gravity / gravity_split / rnea / mass_matrix
+├── kin_pinocchio.py   # UGClient 自带：fk、jacobian、ik_dls、ik_all（多初值+去重+分支标注）、TCP frame
+├── dyn_pinocchio.py   # UGClient 自带：负载感知 gravity / gravity_split / rnea / mass_matrix
 └── factory.py         # 按能力选择实现；以后上游有接口时在这里切换
 ```
 - `interfaces.py` 约定（SI 单位，m/rad）：
@@ -275,12 +276,12 @@ backend/
   - 负载：在最后一个关节上叠加 `pin.Inertia(m, c, I)`（`model.inertias[j6] += …`），默认 `I` 取质点（`I=0`）；`gravity_split` 用“有负载 − 无负载”两个模型算，和 `Jᵀ·F` 交叉校验。
   - IK：阻尼最小二乘（`pin.log6` 误差 + `computeFrameJacobian`，λ 自适应），`ik_all` 用 32 个随机/启发式初值求解后按 1e-3 rad 去重，按 `q2/q3` 符号标注肘上/肘下、按 `q5` 符号标注腕翻转。
   - 也可直接复用 `PinocchioReference` 的 `gravity`/`rnea` 作无负载基准，用于自检。
-- **切换策略（以后，等上游加了接口）**：若 `ufactory_genesis` 将来提供负载 API、Pinocchio IK/FK，只需新增 `kin_ufg.py` / `dyn_ufg.py` 实现同一 Protocol，`factory.py` 按版本探测切换；金标准测试必须两种后端都通过。届时可以再考虑把 Uclient 的实现贡献到上游，但这不在当前计划内。
+- **切换策略（以后，等上游加了接口）**：若 `ufactory_genesis` 将来提供负载 API、Pinocchio IK/FK，只需新增 `kin_ufg.py` / `dyn_ufg.py` 实现同一 Protocol，`factory.py` 按版本探测切换；金标准测试必须两种后端都通过。届时可以再考虑把 UGClient 的实现贡献到上游，但这不在当前计划内。
 - **防回归**：CI 断言 sidecar 导入链中不出现 `torch`、`genesis`；`ufactory_genesis` 锁定到具体 commit/tag（ROADMAP 声明 0.x 接口无兼容承诺）。
 
 ## 10. 打包与跨平台 CI
 
-- **sidecar**：PyInstaller `--onedir`（比 `--onefile` 启动快，onefile 每次要解压到临时目录），Python 3.12，依赖：`ufactory_genesis`（固定 commit，不带 extras）+ `pin==4.0.0` + `numpy` + `pyyaml` + `websockets`。排除 `torch`、`genesis`、`matplotlib`、`coal`、`hppfcl`、`assimp` 相关模块。产物按 Tauri 约定命名 `uclient-core-<target-triple>`，放 `src-tauri/binaries/`，在 `tauri.conf.json > bundle.externalBin` 声明（onedir 用 `bundle.resources` 带上 `_internal/`）。
+- **sidecar**：PyInstaller `--onedir`（比 `--onefile` 启动快，onefile 每次要解压到临时目录），Python 3.12，依赖：`ufactory_genesis`（固定 commit，不带 extras）+ `pin==4.0.0` + `numpy` + `pyyaml` + `websockets`。排除 `torch`、`genesis`、`matplotlib`、`coal`、`hppfcl`、`assimp` 相关模块。产物按 Tauri 约定命名 `ugclient-core-<target-triple>`，放 `src-tauri/binaries/`，在 `tauri.conf.json > bundle.externalBin` 声明（onedir 用 `bundle.resources` 带上 `_internal/`）。
 - **资源**：只打包 `assets/urdf/**/*.urdf`、`visual_glb/*.glb`、`kinematics/default/*.yaml`、`assets/configs/runtime/robots/*.yaml`；**不带** `collision/*.stl` 和 `visual/*.stl`（Pinocchio `buildModelFromUrdf` 不读 mesh；前端只用 GLB）。估计 ≈ 6–8 MB。
 - **GitHub Actions**：v0.1 只有一个打包目标 `ubuntu-22.04`（x64；较老的 glibc 以兼容更多发行版），产物仅 deb（v0.3.1 起取消 AppImage）。步骤：checkout（含 ufactory_genesis 按锁定 tag 拉取）→ setup-python 3.12 → 构建 sidecar → sidecar 冒烟测试（跑 U1 金标准）→ `pnpm build` → `tauri-apps/tauri-action` 打包 → 上传到 Draft Release。PyInstaller 不能交叉编译，以后加 Windows 时在矩阵中增加 `windows-latest`（NSIS + MSI，Windows 10 需 WebView2，`webviewInstallMode: downloadBootstrapper`）。为保持跨平台：路径一律用 `pathlib`/Tauri path API，sidecar 不依赖 POSIX 专有调用；CI 另跑一个**不打包**的 `windows-latest` 单元测试 job（sidecar pytest + 前端 vitest），尽早发现平台问题。macOS 不在计划内。
 - **签名**：v0.1 只发 Linux，不需要代码签名，发布时附 SHA256（可选 GPG 签名）。Windows 代码签名等到 M5 加入 Windows 打包时再定，目前不涉及。
@@ -299,15 +300,15 @@ backend/
   - FK/IK：随机 q → FK → IK(all) 必须包含原解；与 `tcp_offset.pose_flange_to_tcp` 结果一致。
   - 有 Genesis 环境时（维护者本机，非 CI）：与 `DynamicsValidationService` / `armature_aligned_mass` 的结果对比。
 - **sidecar**：pytest，覆盖 API 参数校验、错误码、单位换算（往返 mm/°↔m/rad）、版本协商。
-- **适配层契约测试**：同一套测试对 `backend/factory.py` 返回的每个实现运行（目前只有 Uclient 自带实现）。
+- **适配层契约测试**：同一套测试对 `backend/factory.py` 返回的每个实现运行（目前只有 UGClient 自带实现）。
 - **前端**：vitest + `@vue/test-utils`（单位格式化、项目文件迁移、i18n key 一致性、Pinia store）；Playwright 对 `vite preview` + mock sidecar 跑 UI 冒烟；3D 用截图比对（容差）只在 Linux 上跑。
 - **端到端**：CI 在 Linux 上打包后启动 app（xvfb）+ WebDriver（`tauri-driver`）跑 U1，读取扭矩面板数值。
 - **性能基线**：`kin.ik(all)` < 50 ms，`dyn.gravity` < 1 ms，10 s 轨迹（4 ms 步长）< 1 s。
 
-## 12. Uclient 仓库结构
+## 12. UGClient 仓库结构
 
 ```
-Uclient/
+UGClient/
 ├── apps/desktop/                # 前端 + Tauri
 │   ├── src/                     # Vue 3 + TS
 │   │   ├── main.ts  App.vue
@@ -323,14 +324,14 @@ Uclient/
 │   ├── src-tauri/               # Rust 壳：sidecar.rs, project_io.rs, tauri.conf.json, capabilities/
 │   └── package.json             # vue, element-plus, pinia, vue-i18n, three, urdf-loader, uplot
 ├── core/                        # Python sidecar
-│   ├── uclient_core/
+│   ├── ugclient_core/
 │   │   ├── server.py            # websockets + JSON-RPC 分发
 │   │   ├── api/{robot,kin,dyn,traj,workspace,export}.py
 │   │   ├── units.py
 │   │   └── backend/             # 适配层：interfaces.py, catalog_ufg.py, kin_pinocchio.py, dyn_pinocchio.py, factory.py（§9）
 │   ├── tests/ (golden/, test_*.py)
 │   ├── pyproject.toml           # 锁定 ufactory_genesis @ commit（只读依赖，不修改）
-│   └── uclient-core.spec        # PyInstaller
+│   └── ugclient-core.spec        # PyInstaller
 ├── schema/api.v1.json           # JSON Schema，前后端共用，生成 TS 类型
 ├── scripts/{sync_assets.py, build_sidecar.py}
 ├── docs/{DESIGN.md, ARCHITECTURE.md, user-guide.zh.md, user-guide.en.md}
@@ -343,18 +344,18 @@ Uclient/
 
 ## 13. 开源事项
 
-- **许可证**：Uclient 代码 MIT。依赖：Tauri（MIT/Apache-2.0）、Vue 3（MIT）、Element Plus（MIT）、Pinia（MIT）、vue-i18n（MIT）、three.js（MIT）、urdf-loader（Apache-2.0）、uPlot（MIT）、Draco decoder（Apache-2.0）、Pinocchio（BSD-2-Clause）、numpy（BSD-3）、Boost（BSL-1.0）、Python（PSF）、PyInstaller（GPL-2.0 但带 bootloader 例外，允许分发闭源/任意许可的产物）。`THIRD_PARTY_LICENSES.md` 由脚本（`pip-licenses` + `cargo about` + `license-checker`）生成，随安装包分发。
+- **许可证**：UGClient 代码 MIT。依赖：Tauri（MIT/Apache-2.0）、Vue 3（MIT）、Element Plus（MIT）、Pinia（MIT）、vue-i18n（MIT）、three.js（MIT）、urdf-loader（Apache-2.0）、uPlot（MIT）、Draco decoder（Apache-2.0）、Pinocchio（BSD-2-Clause）、numpy（BSD-3）、Boost（BSL-1.0）、Python（PSF）、PyInstaller（GPL-2.0 但带 bootloader 例外，允许分发闭源/任意许可的产物）。`THIRD_PARTY_LICENSES.md` 由脚本（`pip-licenses` + `cargo about` + `license-checker`）生成，随安装包分发。
 - **资源再分发（重要）**：
   - `ufactory_genesis` 的 `LICENSE` 是 MIT，但 `NOTICE` 明确写：`assets/urdf/` 下的 URDF 和 mesh **“are not pure original MIT-only content”**，源自上游 `xArm-Developer/xarm_ros2` 等 UFACTORY/xArm ROS 描述包，**“Typical upstream license: BSD-3-Clause … a full copy is not vendored here”**。各 `assets/urdf/<name>/README.md` 也写“资产归属见 NOTICE”。仓库里**没有任何单独的资源 LICENSE 文件**。
-  - **决定（v0.3）**：按 `ufactory_genesis` 的 NOTICE 署名，直接随 Uclient 分发所需的 `assets/urdf` 资源，不再单独核验上游许可。具体做法：Uclient 的 `NOTICE` 原样保留 `ufactory_genesis` NOTICE 中的归属说明（来源 `xArm-Developer/xarm_ros2` 等 UFACTORY/xArm ROS 描述包、上游典型许可 BSD-3-Clause、本仓库的修改内容、商标声明），并注明打包的 GLB/URDF 是 `ufactory_genesis` 修改过的衍生物；安装包内附该 NOTICE。
-- **项目性质与商标（已确认）**：用户已批准在个人仓库 `DanielWang123321/Uclient` 开发。README（中英文）首段必须写明：“Uclient 目前是个人项目，处于开发阶段，**不是 UFACTORY 官方产品**，与 UFACTORY 无隶属或背书关系。”同时：不用 UFACTORY logo 和图标；机型名（xArm、UF850、Lite6）只用于描述兼容性（与 `ufactory_genesis` NOTICE 的写法一致）；界面风格“参考”Studio，不复制其图标、配色和截图素材。
+  - **决定（v0.3）**：按 `ufactory_genesis` 的 NOTICE 署名，直接随 UGClient 分发所需的 `assets/urdf` 资源，不再单独核验上游许可。具体做法：UGClient 的 `NOTICE` 原样保留 `ufactory_genesis` NOTICE 中的归属说明（来源 `xArm-Developer/xarm_ros2` 等 UFACTORY/xArm ROS 描述包、上游典型许可 BSD-3-Clause、本仓库的修改内容、商标声明），并注明打包的 GLB/URDF 是 `ufactory_genesis` 修改过的衍生物；安装包内附该 NOTICE。
+- **项目性质与商标（已确认）**：用户已批准在个人仓库 `DanielWang123321/UGClient` 开发。README（中英文）首段必须写明：“UGClient 目前是个人项目，处于开发阶段，**不是 UFACTORY 官方产品**，与 UFACTORY 无隶属或背书关系。”同时：不用 UFACTORY logo 和图标；机型名（xArm、UF850、Lite6）只用于描述兼容性（与 `ufactory_genesis` NOTICE 的写法一致）；界面风格“参考”Studio，不复制其图标、配色和截图素材。
 - **CONTRIBUTING.md**：开发环境（pnpm、Rust stable、Python 3.12、uv；主要在 Linux 上开发，代码须保持跨平台）、提交规范（Conventional Commits，英文）、PR 必须通过 CI 和金标准、新增 API 方法要同步更新 `schema/api.v1.json` 和中英文文案、DCO 签名（`Signed-off-by`）而非 CLA。另附 `SECURITY.md`（sidecar 只监听 127.0.0.1 + token）和 `CODE_OF_CONDUCT.md`（Contributor Covenant）。
 
 ## 14. 里程碑
 
 | 里程碑 | 内容 | 预计 |
 |---|---|---|
-| M0 设计 | 本文档审核；建 Uclient 仓库骨架、CI 空跑（Linux 打包 + Windows 单元测试）| 0.5 周 |
+| M0 设计 | 本文档审核；建 UGClient 仓库骨架、CI 空跑（Linux 打包 + Windows 单元测试）| 0.5 周 |
 | M1 核心 | sidecar：适配层 + 自带 FK/Jacobian/IK、负载感知 gravity/RNEA + 金标准测试；Linux PyInstaller 产物 + 体积实测；锁定带官方最大关节扭矩的 `ufactory_genesis` tag（若已发布）| 1.5–2 周 |
 | M2 MVP 界面 | Tauri 壳 + Vue/Element Plus 界面 + 3D 视图 + 校核页（关节点动、TCP 输入 IK、扭矩面板、COM 标记、CSV）| 2 周 |
 | **v0.1.0** | Linux 安装包（deb）、中英文、README（含个人项目声明）| — |
@@ -366,8 +367,8 @@ Uclient/
 ## 15. 风险与待确认问题
 
 **风险**
-- R1 `ufactory_genesis` 0.x 接口无兼容承诺（ROADMAP 明确），Uclient 锁定 commit，并在 CI 跑“import 不拉 torch”检查；适配层把依赖面限制在 `ufactory.robots`、`ufactory.config.loader`、`ufactory.kinematics.tcp_offset` 几个模块。
-- R2 自带 IK/负载实现由 Uclient 自己维护，与上游未来的实现可能有细微差异；用金标准和 `Jᵀ·F` 交叉校验约束。
+- R1 `ufactory_genesis` 0.x 接口无兼容承诺（ROADMAP 明确），UGClient 锁定 commit，并在 CI 跑“import 不拉 torch”检查；适配层把依赖面限制在 `ufactory.robots`、`ufactory.config.loader`、`ufactory.kinematics.tcp_offset` 几个模块。
+- R2 自带 IK/负载实现由 UGClient 自己维护，与上游未来的实现可能有细微差异；用金标准和 `Jᵀ·F` 交叉校验约束。
 - R3 Pinocchio wheel 在 Windows 上的 PyInstaller 打包（cmeel 前缀、Boost.Python 动态库路径）可能需要自定义 hook；推迟到 M5，Windows 单元测试 job 先暴露问题。
 - R4 最大关节扭矩依赖 `ufactory_genesis` 即将发布的更新：发布前用当前值开发，金标准中的百分比需在锁定新 tag 时同步更新（扭矩绝对值不受影响）。
 - R5 数值与真机不一致：URDF 惯性参数为名义值，不含摩擦、减速器效率和每台机器的标定；报告里必须写出这些假设。
@@ -375,7 +376,7 @@ Uclient/
 **已确认（v0.2–v0.3）**
 | # | 问题 | 决定 |
 |---|---|---|
-| ✔1 | 仓库与名称 | 个人仓库 `DanielWang123321/Uclient`，开发阶段；README 声明“个人项目，非 UFACTORY 官方产品”（§13）|
+| ✔1 | 仓库与名称 | 个人仓库 `DanielWang123321/UGClient`，开发阶段；README 声明“个人项目，非 UFACTORY 官方产品”（§13）|
 | ✔2 | 校核输入位姿参考点 | 默认 TCP 位姿（已叠加 TCP Offset），法兰需显式 `frame:"flange"`（§5.1）|
 | ✔3 | 负载语义 | 与 UFACTORY Studio 完全一致：工具+工件总质量，COM 相对法兰；夹爪模型只做外观（§6.1）|
 | ✔4 | 前端框架 | Vue 3 + TypeScript + Vite + Element Plus，three.js 直接使用，曲线用 uPlot（§4）|
@@ -390,4 +391,4 @@ Uclient/
 
 **待确认问题：无。** 所有问题均已关闭。唯一的外部依赖是 `ufactory_genesis` 带官方最大关节扭矩的版本发布，发布后把 tag 告诉我即可锁定（不影响 M0–M2 开发）。
 
-> 注：`gripper.tool_tip_offset_z_m`（G2 0.1011 m、Lite6 0.0543 m）是 ufactory_genesis 抓取规划用的 link6→手指中间偏移，**不是 TCP**，Uclient 不使用它。
+> 注：`gripper.tool_tip_offset_z_m`（G2 0.1011 m、Lite6 0.0543 m）是 ufactory_genesis 抓取规划用的 link6→手指中间偏移，**不是 TCP**，UGClient 不使用它。

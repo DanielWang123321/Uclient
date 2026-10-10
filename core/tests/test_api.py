@@ -3,9 +3,9 @@
 import numpy as np
 import pytest
 
-from uclient_core import errors, units
-from uclient_core.rpc import Connection
-from uclient_core.session import SessionStore
+from ugclient_core import errors, units
+from ugclient_core.rpc import Connection
+from ugclient_core.session import SessionStore
 
 
 def test_auth_required():
@@ -28,7 +28,7 @@ def test_hello_and_ping(client):
     assert client.call("ping") == "pong"
     h = client.call("system.hello", token="t0k")
     assert h["api_version"] == "1.0" and h["pinocchio_version"] == "4.0.0"
-    assert h["backend"] == {"kin": "uclient", "dyn": "uclient"}
+    assert h["backend"] == {"kin": "ugclient", "dyn": "ugclient"}
 
 
 def test_robot_list_supported_models(client):
@@ -82,7 +82,7 @@ def test_schema_lists_every_method():
     import json
     from pathlib import Path
 
-    from uclient_core.rpc import METHODS
+    from ugclient_core.rpc import METHODS
 
     schema = json.loads((Path(__file__).resolve().parents[2] / "schema" / "api.v1.json").read_text(encoding="utf-8"))
     assert set(METHODS) | {"system.hello", "system.shutdown", "ping"} == set(schema["methods"])
@@ -137,7 +137,7 @@ def test_synced_assets_cover_every_visual_urdf(tmp_path):
     import importlib.util
     from pathlib import Path
 
-    from uclient_core.backend import factory
+    from ugclient_core.backend import factory
 
     root = Path(__file__).resolve().parents[2]
     spec = importlib.util.spec_from_file_location("sync_assets", root / "scripts" / "sync_assets.py")
@@ -161,7 +161,7 @@ def test_synced_assets_cover_every_visual_urdf(tmp_path):
 
 def test_bio_g2_default_tcp_is_official_constant(client):
     """BIO G2 uses the official UFACTORY offset on every arm (not the URDF tcp frame)."""
-    from uclient_core.backend.catalog_ufg import OFFICIAL_TCP_OFFSETS
+    from ugclient_core.backend.catalog_ufg import OFFICIAL_TCP_OFFSETS
 
     assert OFFICIAL_TCP_OFFSETS["bio_gripper_g2"] == (159.5, 0.0, 59.5, 0.0, 0.0, 0.0)
     for robot in ("uf850", "xarm5_1305", "xarm6_1305", "xarm7_1305"):
@@ -171,7 +171,7 @@ def test_bio_g2_default_tcp_is_official_constant(client):
 
 
 def test_lite6_vacuum_default_tcp_is_official_constant(client):
-    from uclient_core.backend.catalog_ufg import OFFICIAL_TCP_OFFSETS
+    from ugclient_core.backend.catalog_ufg import OFFICIAL_TCP_OFFSETS
 
     assert OFFICIAL_TCP_OFFSETS["lite6_vacuum_gripper"] == (0.0, 0.0, 61.1, 0.0, 0.0, 0.0)
     s = client.call("robot.info", robot="lite6", end_effector="lite6_vacuum_gripper")

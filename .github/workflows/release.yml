@@ -42,6 +42,6 @@ jobs:
           cd apps/desktop/src-tauri/target/release/bundle/deb
           sha256sum *.deb > SHA256SUMS.txt
           cat SHA256SUMS.txt
-          gh release create "${GITHUB_REF_NAME}" --title "Uclient ${GITHUB_REF_NAME}" \
+          gh release create "${GITHUB_REF_NAME}" --title "UGClient ${GITHUB_REF_NAME}" \
             --notes-file "${GITHUB_WORKSPACE}/docs/release-notes/${GITHUB_REF_NAME}.md" \
             *.deb SHA256SUMS.txt

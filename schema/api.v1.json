@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Uclient sidecar API",
+  "title": "UGClient sidecar API",
   "version": "1.0",
   "description": "JSON-RPC 2.0 over ws://127.0.0.1:<port>. Units: mm, deg, kg, N·m, s. Pose defaults to TCP (flange ∘ TCP offset). See docs/DESIGN.md §5.",
   "methods": {

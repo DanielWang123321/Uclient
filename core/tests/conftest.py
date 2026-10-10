@@ -3,8 +3,8 @@ from pathlib import Path
 
 import pytest
 
-from uclient_core.rpc import Connection
-from uclient_core.session import SessionStore
+from ugclient_core.rpc import Connection
+from ugclient_core.session import SessionStore
 
 GOLDEN = Path(__file__).parent / "golden"
 

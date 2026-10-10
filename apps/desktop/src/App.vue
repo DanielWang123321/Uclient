@@ -14,7 +14,7 @@ const engine = useEngineStore()
 const robot = useRobotStore()
 const tab = ref<'check' | 'trajectory' | 'workspace'>('check')
 const elLocale = computed(() => (locale.value === 'zh' ? zhCn : enLocale))
-watch(locale, (l) => localStorage.setItem('uclient.locale', l))
+watch(locale, (l) => localStorage.setItem('ugclient.locale', l))
 
 async function start() {
   if (await engine.connect()) {
@@ -29,7 +29,7 @@ onMounted(start)
   <el-config-provider :locale="elLocale" size="small">
     <div class="shell">
       <header class="top">
-        <div class="brand"><span class="logo">U</span> Uclient <span class="tag">{{ $t('app.personal') }}</span></div>
+        <div class="brand"><span class="logo">U</span> UGClient <span class="tag">{{ $t('app.personal') }}</span></div>
         <el-segmented
           v-model="tab" :options="[
             { label: $t('tabs.check'), value: 'check' },

@@ -25,7 +25,7 @@ onMounted(() => {
       ctl.setPayload(robot.payload.mass_kg, robot.payload.com_mm)
     }
   }
-  ;(window as unknown as { __uclientScene?: SceneController }).__uclientScene = ctl
+  ;(window as unknown as { __ugclientScene?: SceneController }).__ugclientScene = ctl
   load()
 })
 onBeforeUnmount(() => {

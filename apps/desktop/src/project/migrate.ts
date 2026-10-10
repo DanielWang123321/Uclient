@@ -1,4 +1,8 @@
-// Project file (*.uclient.json) schema and migrations (design doc §6.1).
+// Project file (*.ugclient.json) schema and migrations (design doc §6.1).
+// UGClient was formerly named Uclient: legacy *.uclient.json files (app.name 'Uclient') load unchanged.
+
+export const PROJECT_EXTENSIONS = ['.ugclient.json', '.uclient.json'] as const
+export const isProjectFileName = (name: string) => PROJECT_EXTENSIONS.some((e) => name.toLowerCase().endsWith(e))
 export const SCHEMA_VERSION = 1
 
 export interface TcpPreset {
@@ -29,7 +33,7 @@ export interface ProjectFile {
 export function newProject(): ProjectFile {
   return {
     schema_version: SCHEMA_VERSION,
-    app: { name: 'Uclient', version: '0.1.0' },
+    app: { name: 'UGClient', version: '0.1.0' },
     core: { ufactory_genesis_commit: 'be49519', pinocchio: '4.0.0' },
     robot: { key: 'uf850', end_effector: 'none', calibration: null, mounting: { gravity_dir: [0, 0, -1] } },
     // Tool TCPs come from the sidecar (URDF tcp joint of the mounted end effector), not from here.

@@ -157,7 +157,7 @@ jobs:
           sha256sum deb/*.deb | tee SHA256SUMS.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: uclient-linux-x64
+          name: ugclient-linux-x64
           path: |
             apps/desktop/src-tauri/target/release/bundle/deb/*.deb
             apps/desktop/src-tauri/target/release/bundle/SHA256SUMS.txt

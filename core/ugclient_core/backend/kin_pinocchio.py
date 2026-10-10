@@ -1,4 +1,4 @@
-"""Uclient's own Pinocchio kinematics: FK, Jacobian, damped-least-squares IK (doc §9).
+"""UGClient's own Pinocchio kinematics: FK, Jacobian, damped-least-squares IK (doc §9).
 
 ufactory_genesis has no Pinocchio-only IK yet; this lives here behind the adapter layer.
 """
