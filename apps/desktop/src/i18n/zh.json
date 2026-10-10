@@ -80,5 +80,9 @@
     "mode": "模式",
     "position": "位置",
     "readOnly": "只读"
+  },
+  "settings": {
+    "title": "设置",
+    "placeholder": "设置项将在这里提供（步长、速度等）。"
   }
 }

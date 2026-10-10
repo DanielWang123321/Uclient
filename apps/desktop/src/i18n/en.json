@@ -80,5 +80,9 @@
     "mode": "Mode",
     "position": "Position",
     "readOnly": "read-only"
+  },
+  "settings": {
+    "title": "Settings",
+    "placeholder": "Settings will be added here (step sizes, speeds, ...)."
   }
 }

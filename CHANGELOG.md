@@ -10,6 +10,8 @@ All notable changes to UGClient (formerly Uclient) are documented here. Format: 
 - Base and TCP coordinate axes drawn as solid X red / Y green / Z blue (always visible over the robot); the view toolbar shows a matching X/Y/Z legend.
 - Camera framing tuned for the larger free scene area.
 - Home and Align follow the jog click/hold model: a click moves one joint-space step toward the target (at most 1 deg per joint) and ends in state 4; holding moves continuously at joint speed until release (state 4) or arrival. Align's unreachable error is shown before any motion.
+- The 中/EN language switch moved to a dark floating pill at the top right, next to STOP.
+- Settings button (⚙) at the bottom of the left panel opens a placeholder Settings dialog (contents to come).
 
 ## [0.2.0] - 2026-10-10
 
