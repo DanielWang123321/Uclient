@@ -25,7 +25,7 @@ Uclient 是一个开源桌面客户端（Tauri v2 + Vue 3），基于 [`ufactory
 | CI 中打 Linux deb 包 | ✅（未签名的开发构建） |
 | 轨迹与 τ(t) 曲线（M3）、工作空间与标定（M4） | ⏳ |
 
-计算结果是**静态模型**：URDF 名义惯性参数，不含摩擦、减速器效率和单机标定。额定扭矩运行时从 `ufactory_genesis` 读取（当前锁定 commit `60fe926`，为开发用数值），官方额定扭矩版本发布后切换。
+计算结果是**静态模型**：URDF 名义惯性参数，不含摩擦、减速器效率和单机标定。最大关节扭矩（[UFACTORY 关节参数](https://docs.supportarticle.ufactory.cc/zhHans/support_articles/hardware/ufactory-joint-parameters.html)）运行时从 `ufactory_genesis` 读取（当前锁定 commit `be49519`，已包含 UFACTORY 官方关节扭矩限值）。
 
 ## 开发（Linux）
 

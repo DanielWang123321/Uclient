@@ -13,7 +13,7 @@ const rows = computed(() => {
     tau: t.tau_nm[i],
     arm: t.tau_arm_nm?.[i],
     pl: t.tau_payload_nm?.[i],
-    rated: t.effort_limits_nm[i],
+    max: t.effort_limits_nm[i],
     util: t.utilization[i],
     level: utilLevel(t.utilization[i]),
   }))
@@ -30,7 +30,7 @@ async function exportCsv() {
     <table class="tq num" data-test="torque-table">
       <thead>
         <tr>
-          <th></th><th>{{ $t('torque.total') }}</th><th>{{ $t('torque.arm') }}</th><th>{{ $t('torque.payload') }}</th><th>%</th>
+          <th></th><th>{{ $t('torque.total') }}</th><th>{{ $t('torque.arm') }}</th><th>{{ $t('torque.payload') }}</th><th :title="$t('torque.max')">{{ $t('torque.pct') }}</th>
         </tr>
       </thead>
       <tbody>

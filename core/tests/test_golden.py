@@ -28,7 +28,7 @@ def test_gravity_at_golden_q(client, golden):
         if exp is not None:
             assert abs(got - exp) <= tol + 5e-4
     np.testing.assert_allclose(np.add(r["tau_arm_nm"], r["tau_payload_nm"]), r["tau_nm"], atol=1e-9)
-    # utilisation is computed from the runtime rated torques, never hard-coded
+    # utilisation is computed from the runtime max joint torques, never hard-coded
     np.testing.assert_allclose(r["utilization"], np.abs(r["tau_nm"]) / np.asarray(r["effort_limits_nm"]))
 
 
@@ -116,3 +116,17 @@ def test_tcp_frame_matches_upstream_pose_flange_to_tcp(client, key):
         expect = pose_flange_to_tcp([*fl[:3], *np.radians(fl[3:])], [*off[:3], *np.radians(off[3:])])
         np.testing.assert_allclose(r["tcp_pose"][:3], expect[:3], atol=1e-6)
         np.testing.assert_allclose(_wrapdiff(r["tcp_pose"][3:], np.degrees(expect[3:])), 0, atol=1e-6)
+
+
+def test_official_torque_limits_and_utilization(client, golden):
+    """ufactory_genesis be49519 carries the official UF850 limits; U1 utilization J2 19.6 %, J3 12.6 %."""
+    s = _load(client, golden)
+    limits = s["effort_limits_nm"]
+    np.testing.assert_allclose(limits, [382.5, 382.5, 243.525, 117.3, 38.25, 38.25])
+    tau = np.array(golden["expected"]["tau_nm"])
+    util = np.abs(tau) / np.array(limits)
+    np.testing.assert_allclose(util[1:3], [0.19597, 0.12579], atol=5e-5)
+    for key in ("uf850", "xarm5_1305", "xarm6_1305", "xarm7_1305", "lite6"):
+        info = client.call("robot.info", robot=key)
+        assert len(info["effort_limits_nm"]) == info["dof"]
+        assert all(v > 0 for v in info["effort_limits_nm"])

@@ -36,7 +36,7 @@ def test_robot_list_supported_models(client):
     assert keys == ["uf850", "xarm5_1305", "xarm6_1305", "xarm7_1305", "lite6"]
 
 
-def test_robot_info_reads_rated_torques_from_ufactory_genesis(client):
+def test_robot_info_reads_max_torques_from_ufactory_genesis(client):
     from ufactory.config.loader import load_runtime_config
 
     info = client.call("robot.info", robot="uf850")

@@ -30,7 +30,7 @@ export function newProject(): ProjectFile {
   return {
     schema_version: SCHEMA_VERSION,
     app: { name: 'Uclient', version: '0.1.0' },
-    core: { ufactory_genesis_commit: '60fe926', pinocchio: '4.0.0' },
+    core: { ufactory_genesis_commit: 'be49519', pinocchio: '4.0.0' },
     robot: { key: 'uf850', end_effector: 'none', calibration: null, mounting: { gravity_dir: [0, 0, -1] } },
     // Tool TCPs come from the sidecar (URDF tcp joint of the mounted end effector), not from here.
     tcp_presets: [{ id: 'flange', name: 'Flange', offset: [0, 0, 0, 0, 0, 0] }],

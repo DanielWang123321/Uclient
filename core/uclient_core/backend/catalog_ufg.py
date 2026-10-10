@@ -1,7 +1,9 @@
 """RobotCatalog backed by ufactory_genesis (read-only use of upstream modules).
 
 Only ``ufactory.robots`` and ``ufactory.config`` are imported, never torch/genesis.
-Rated torques (``effort_limits_nm``) are read at runtime from the upstream runtime
+Maximum joint torques (``effort_limits_nm``, UFACTORY joint parameters:
+https://docs.supportarticle.ufactory.cc/zhHans/support_articles/hardware/ufactory-joint-parameters.html)
+are read at runtime from the upstream runtime
 config and are never hard-coded in Uclient (design doc §9).
 """
 

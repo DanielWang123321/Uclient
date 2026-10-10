@@ -53,9 +53,10 @@
     "total": "Total",
     "arm": "Arm",
     "payload": "Payload",
-    "rated": "Rated",
     "exportCsv": "Export CSV",
-    "assumption": "Static gravity only; no friction, gearbox efficiency or per-unit calibration."
+    "assumption": "Static gravity only; no friction, gearbox efficiency or per-unit calibration.",
+    "max": "Max torque",
+    "pct": "% of max torque"
   },
   "view": {
     "reset": "Reset view",

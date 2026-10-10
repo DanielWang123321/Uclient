@@ -30,8 +30,8 @@ include = ["uclient_core*"]
 
 [tool.uclient.ufactory_genesis]
 repository = "https://github.com/xArm-Developer/ufactory_genesis.git"
-# Development pin (design doc §9). Switch to the tag with official rated torques once released.
-commit = "60fe926"
+# Pinned commit (design doc §9): be49519 carries the official UFACTORY maximum joint torques.
+commit = "be49519"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

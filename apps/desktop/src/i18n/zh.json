@@ -53,9 +53,10 @@
     "total": "总计",
     "arm": "本体",
     "payload": "负载",
-    "rated": "额定",
     "exportCsv": "导出 CSV",
-    "assumption": "仅静态重力；不含摩擦、减速器效率和单机标定。"
+    "assumption": "仅静态重力；不含摩擦、减速器效率和单机标定。",
+    "max": "最大扭矩",
+    "pct": "占最大扭矩 %"
   },
   "view": {
     "reset": "重置视角",

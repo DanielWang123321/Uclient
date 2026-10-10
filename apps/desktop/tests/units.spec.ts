@@ -7,7 +7,7 @@ describe('units', () => {
     expect(fmt(74.95812)).toBe('74.958')
     expect(fmt(-0.0001)).toBe('0.000')
     expect(fmt(undefined)).toBe('—')
-    expect(fmtPct(0.37479)).toBe('37.5%')
+    expect(fmtPct(0.19597)).toBe('19.6%')
   })
   it('classifies utilisation bands', () => {
     expect(utilLevel(0.2)).toBe('ok')
@@ -25,7 +25,7 @@ describe('units', () => {
       over_limit: [false, false],
     })
     const lines = csv.trim().split('\n')
-    expect(lines[0]).toBe('joint,q_deg,tau_nm,tau_arm_nm,tau_payload_nm,rated_nm,utilization_pct')
+    expect(lines[0]).toBe('joint,q_deg,tau_nm,tau_arm_nm,tau_payload_nm,max_torque_nm,utilization_pct')
     expect(lines[2]).toBe('joint2,-86.4010,74.9580,50.5310,24.4270,200.00,37.48')
   })
 })

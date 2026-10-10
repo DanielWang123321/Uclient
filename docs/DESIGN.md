@@ -1,16 +1,17 @@
 # Uclient 设计文档 v0.3（草案）
 
 > 状态：草案，v0.1 的全部待确认问题均已答复并落实到正文
-> 依赖库：`ufactory_genesis`（MIT，现托管于 `xArm-Developer/ufactory_genesis`，本文基于本地 commit `60fe926`，v0.3.x）
+> 依赖库：`ufactory_genesis`（MIT，现托管于 `xArm-Developer/ufactory_genesis`，本文基于 commit `be49519`，v0.3.x）
 > 性质：开发阶段的**个人项目**，不是 UFACTORY 官方产品
 
 ## 修订记录
 
 | 版本 | 日期 | 变更 |
 |---|---|---|
-| v0.3.2 | 2026-10-10 | 末端默认 TCP 改为 URDF tcp 关节（G2 172 mm，Lite6 夹爪 83.6 mm）；`tool_tip_offset_z_m` 不是 TCP。 |
+| v0.3.3 | 2026-10-10 | ufactory_genesis 锁定到 `be49519`（官方最大关节扭矩）；“额定”统一改称“最大扭矩”（UI、CSV 列 `max_torque_nm`、文档）；U1 利用率 J2 19.6%、J3 12.6%，扭矩不变。 |
+| v0.3.2 | 2026-10-10 | 末端默认 TCP：G2 172 mm、Lite6 夹爪 83.6 mm 取 URDF tcp 关节；BIO G2 [159.5,0,59.5]、Lite6 吸头 z 61.1 mm 为官方常量；`tool_tip_offset_z_m` 不是 TCP。 |
 | v0.3.1 | 2026-10-10 | Linux 只打 deb 包，取消 AppImage（用户决定）；CI/发布流程、README 同步更新。 |
-| v0.3 | 2026-10-10 | 资源 `assets/urdf` 按 `ufactory_genesis` NOTICE 署名直接随包分发，不再单独核验；v0.1 只打 Linux 包（ubuntu-22.04：AppImage + deb），Windows 10+ 打包移到后续里程碑，代码保持跨平台；额定扭矩运行时从 `ufactory_genesis` 读取、不在本地硬编码，并锁定即将发布的官方额定值版本；xArm 系列只支持 `_1305`；所有待确认问题已关闭。 |
+| v0.3 | 2026-10-10 | 资源 `assets/urdf` 按 `ufactory_genesis` NOTICE 署名直接随包分发，不再单独核验；v0.1 只打 Linux 包（ubuntu-22.04：AppImage + deb），Windows 10+ 打包移到后续里程碑，代码保持跨平台；最大关节扭矩运行时从 `ufactory_genesis` 读取、不在本地硬编码，并锁定即将发布的官方最大扭矩值版本；xArm 系列只支持 `_1305`；所有待确认问题已关闭。 |
 | v0.2 | 2026-10-10 | 确认个人仓库 `DanielWang123321/Uclient`，README 必须声明“个人项目、非 UFACTORY 官方产品”；校核输入位姿默认 TCP（已叠加 TCP Offset）；负载定义与 UFACTORY Studio 完全一致；前端由 Svelte 5 改为 Vue 3 + TypeScript + Vite + Element Plus，曲线库选 uPlot；暂不修改 `ufactory_genesis`，负载感知的重力/RNEA、纯 Pinocchio IK、FK/Jacobian 都在 sidecar 中实现，经适配层 `backend/` 隔离，上游有接口后再切换；平台收窄为 Linux + Windows 10+，移除 macOS 构建和签名公证；更新待确认问题。 |
 | v0.1 | 2026-10-10 | 初稿。 |
 
@@ -41,7 +42,7 @@
 
 | # | 用例 | 输入 | 输出 |
 |---|---|---|---|
-| U1 | **姿态+负载扭矩校核**（金标准用例）| UF850，TCP 位姿 `[830, 0, 200, -180, 0, 0]`（mm/°，**默认是 TCP 位姿，已叠加当前 TCP Offset**），负载 3.0 kg，质心 `[0, 0, 35]` mm（相对法兰，与 Studio 一致）| 全部 IK 解列表；选中解（默认肘上）的各关节重力扭矩、占额定扭矩百分比，拆分为“本体”和“负载”两部分 |
+| U1 | **姿态+负载扭矩校核**（金标准用例）| UF850，TCP 位姿 `[830, 0, 200, -180, 0, 0]`（mm/°，**默认是 TCP 位姿，已叠加当前 TCP Offset**），负载 3.0 kg，质心 `[0, 0, 35]` mm（相对法兰，与 Studio 一致）| 全部 IK 解列表；选中解（默认肘上）的各关节重力扭矩、占最大关节扭矩百分比，拆分为“本体”和“负载”两部分 |
 | U2 | 可达性 / IK | 目标 TCP 位姿 + TCP Offset | 是否可达、所有解（肘上/肘下、腕翻转）、关节限位余量、最近可达点 |
 | U3 | 工作空间可视化 | 机型、TCP、可选固定姿态 | 点云/切片，按“最大扭矩利用率”或“可操作度”着色 |
 | U4 | 轨迹回放 + 扭矩曲线 | 关节或笛卡尔路点 + 速度/加速度 | 3D 动画、`τ(t)`（RNEA，含惯性项）、峰值和越限提示 |
@@ -49,7 +50,7 @@
 | U6 | 配置比较 | 2~N 套负载/TCP 配置 | 同一位姿下扭矩对比表 |
 
 U1 已在盒子里验证过（脚本 `/home/box/dev/ufactory_genesis_calc/calc_uf850_torque.py`，当时 TCP Offset = 0，即 TCP 与法兰重合，所以这组数对应“TCP Offset 为零”的 TCP 输入）：
-q = `[0, −86.401, −144.409, −180, 58.007, −180]°`，τ ≈ J2 74.958 N·m，J3 −30.634 N·m，J4 −0.662 N·m，其余 ≈ 0；负载部分（J2 24.427、J3 −12.972）与 `Jᵀ·F` 独立核对一致（误差 < 0.001 N·m）。按当前仓库的 `effort_limits_nm` 折算为 J2 37.5%、J3 34.0%；**这两个百分比会随 `ufactory_genesis` 即将发布的官方额定扭矩而变化**，扭矩绝对值不变。这组数会直接成为测试金标准（§11）。若用户设了非零 TCP Offset（例如 G2 的 172 mm），同一个 TCP 位姿对应的法兰位置会变，扭矩也随之变化，这是预期行为。
+q = `[0, −86.401, −144.409, −180, 58.007, −180]°`，τ ≈ J2 74.958 N·m，J3 −30.634 N·m，J4 −0.662 N·m，其余 ≈ 0；负载部分（J2 24.427、J3 −12.972）与 `Jᵀ·F` 独立核对一致（误差 < 0.001 N·m）。按当前仓库的 `effort_limits_nm` 折算为 J2 19.6%、J3 12.6%（`be49519` 官方限值）（`60fe926` 开发值下为 37.5%、34.0%），扭矩绝对值不变。这组数会直接成为测试金标准（§11）。若用户设了非零 TCP Offset（例如 G2 的 172 mm），同一个 TCP 位姿对应的法兰位置会变，扭矩也随之变化，这是预期行为。
 
 ## 3. 功能清单（MVP vs 后续）
 
@@ -61,7 +62,7 @@ q = `[0, −86.401, −144.409, −180, 58.007, −180]°`，τ ≈ J2 74.958 N�
 | 关节点动 | 滑块 + 数值输入，限位显示 | 键盘步进 | — |
 | 笛卡尔点动 | 基坐标系 / 工具坐标系 XYZ RPY 步进（走 IK）| 3D 拖拽 TCP gizmo | — |
 | FK/IK | FK；Pinocchio 阻尼最小二乘 IK，多初值求全部解 | 解析解（6 轴）| 冗余 7 轴零空间滑块 |
-| 动力学 | 静态重力扭矩 + 本体/负载分解 + 额定百分比 | RNEA 逆动力学、质量矩阵 | 摩擦/减速器效率模型 |
+| 动力学 | 静态重力扭矩 + 本体/负载分解 + 最大扭矩占比 | RNEA 逆动力学、质量矩阵 | 摩擦/减速器效率模型 |
 | 轨迹 | — | 关节空间梯形/S 曲线插值，回放 + 扭矩曲线 | 笛卡尔直线 / 圆弧；导入 Studio/SDK 轨迹 |
 | 工作空间 | — | 采样点云 + 扭矩利用率着色 | 切片、包络网格 |
 | 导出 | CSV / JSON | HTML 报告（含截图）| PDF |
@@ -101,7 +102,7 @@ flowchart LR
   - **three.js 直接使用**，不经 TresJS 之类封装：3D 视图是一个 `Viewport.vue` 组件，内部持有命令式的 `SceneController`（`src/three/`），three.js 对象**不放进 Vue 的响应式系统**（用 `markRaw` / 普通类字段），避免深层代理拖慢渲染；Vue 只通过 `watch` 把 `q`、TCP、负载等参数推给 `SceneController`。
   - **曲线库选 uPlot**（不选 ECharts）。理由：τ(t) 曲线是“多条 + 万点级 + 回放时游标实时移动”的时间序列，uPlot 专为此设计，canvas 绘制、约 50 KB，10⁵ 点仍流畅；ECharts 功能全但约 1 MB（按需引入也有数百 KB），大量点需开 `large`/采样模式。工作空间统计等少量柱状图用 Element Plus 进度条或简单 SVG 即可，不需要 ECharts。若以后要做复杂报告图表，再按需引入 ECharts。
 - **渲染在前端**：后端只返回关节角 `q`、坐标系位姿和数值；mesh 不经 WebSocket 传输。
-- **单一真相**：机型元数据（关节名、限位、额定扭矩、URDF 路径）全部由 sidecar 从 `ufactory_genesis` 读出后通过 `robot.describe` 下发，前端不硬编码。
+- **单一真相**：机型元数据（关节名、限位、最大关节扭矩、URDF 路径）全部由 sidecar 从 `ufactory_genesis` 读出后通过 `robot.describe` 下发，前端不硬编码。
 
 **进程/线程模型（sidecar）**：`asyncio` + `websockets`；计算是 CPU 密集，但单次 FK/重力 < 1 ms，直接在事件循环内跑；工作空间采样和轨迹这类长任务放 `ProcessPoolExecutor`，带 `job_id`，支持 `job.cancel`，进度以通知推送。每个“会话”持有一个 `RobotSession`（Pinocchio model/data 缓存，按 `robot+end_effector+calibration` 键缓存）。
 
@@ -166,7 +167,7 @@ flowchart LR
 {
   "schema_version": 1,
   "app": {"name": "Uclient", "version": "0.1.0"},
-  "core": {"ufactory_genesis_commit": "60fe926", "pinocchio": "4.0.0"},
+  "core": {"ufactory_genesis_commit": "be49519", "pinocchio": "4.0.0"},
   "robot": {"key": "uf850", "end_effector": "none", "calibration": null,
             "mounting": {"gravity_dir": [0, 0, -1]}},
   "tcp_presets":     [{"id": "flange", "name": "Flange", "offset": [0,0,0,0,0,0]},
@@ -213,7 +214,7 @@ Studio 的 Live Control 页：中间 3D 视图（Reset Perspective、Base/TCP �
 │ TCP 830,0,200 │                                          │ J3 ████ -30.6 34% │
 │ 可达 ✔ 8 解   │                                          │ ...  [导出 CSV]   │
 ├───────────────┴──────────────────────────────────────────┴───────────────────┤
-│ 引擎 ● 已连接 core 0.1.0 / ufactory_genesis 60fe926 / pinocchio 4.0.0   日志 ▴│
+│ 引擎 ● 已连接 core 0.1.0 / ufactory_genesis be49519 / pinocchio 4.0.0   日志 ▴│
 └──────────────────────────────────────────────────────────────────────────────┘
 ```
 ### 7.2 轨迹页
@@ -224,7 +225,7 @@ Studio 的 Live Control 页：中间 3D 视图（Reset Perspective、Base/TCP �
 │ [+ 当前位姿]      │                                            │ a_max 200°/s² │
 ├───────────────────┴────────────────────────────────────────────┴───────────────┤
 │ ▶ ❚❚  0.00 s ━━━━━━━●━━━━━━━━━━━━ 3.20 s  ×1.0                                  │
-│ τ(t) ┤ J1 ─ J2 ─ J3 ─ ...       额定线 ┄┄ 100%   峰值 J2 112 N·m @1.8s (56%)  │
+│ τ(t) ┤ J1 ─ J2 ─ J3 ─ ...       最大扭矩线 ┄┄ 100%   峰值 J2 112 N·m @1.8s (56%)  │
 └────────────────────────────────────────────────────────────────────────────────┘
 ```
 ### 7.3 工作空间页：左侧采样参数（点数、固定姿态、着色指标），中间点云，右侧色标和统计（可达率、最大利用率位置）。
@@ -254,7 +255,7 @@ Studio 的 Live Control 页：中间 3D 视图（Reset Perspective、Base/TCP �
 - IK 只有 Genesis/torch 版本（`ufactory/kinematics/genesis.py::solve_link6_ik`、`ufactory/trajectory/ik.py`），**没有纯 Pinocchio 的 IK**。
 - TCP 相关只有位姿换算：`ufactory/kinematics/tcp_offset.py`（`pose_to_matrix`、`pose_flange_to_tcp`、`pose_tcp_to_flange`、`rpy_matrix`），只依赖 numpy，可直接调用。
 - 机型和资源：`ufactory/robots/registry.py`（`RobotModelSpec`、`ROBOT_PROFILES`、`get_robot_profile`）、`ufactory/robots/paths.py`（`robot_urdf`、`robot_visual_glb_urdf`）、`ufactory/config/assets.py::RepositoryAssetStore`。已验证 `import ufactory.robots, ufactory.kinematics.tcp_offset, ufactory.config.loader` 不会拉起 torch/genesis。
-- 额定扭矩：`assets/configs/runtime/robots/*.yaml` 的 `arm.effort_limits_nm`，通过 `ufactory.config.loader.load_runtime_config` 读取。**Uclient 在运行时从 `ufactory_genesis` 读取，不在本地硬编码或复制任何额定值**（`catalog_ufg.py` 读取后经 `robot.load.effort_limits_nm` 下发，前端只显示）。用户即将发布的 `ufactory_genesis` 更新会把这些值改为官方额定扭矩；该版本发布后 Uclient 立即锁定到它的 tag（在此之前锁定当前 commit `60fe926`，值如 uf850 `[200,200,90,68,19,19]`，仅作开发用）。
+- 最大关节扭矩（UFACTORY 官方关节参数：https://docs.supportarticle.ufactory.cc/zhHans/support_articles/hardware/ufactory-joint-parameters.html；Lite6 J4/J6 为直驱无减速器，1.365 N·m 正确）：`assets/configs/runtime/robots/*.yaml` 的 `arm.effort_limits_nm`，通过 `ufactory.config.loader.load_runtime_config` 读取。**Uclient 在运行时从 `ufactory_genesis` 读取，不在本地硬编码或复制任何最大扭矩值**（`catalog_ufg.py` 读取后经 `robot.load.effort_limits_nm` 下发，前端只显示）。自 `ufactory_genesis` commit `be49519`（PR #3，未打 tag）起这些值为 UFACTORY 官方关节扭矩限值，Uclient 已锁定到该 commit（uf850 `[382.5,382.5,243.525,117.3,38.25,38.25]`；此前 `60fe926` 的 `[200,200,90,68,19,19]` 为开发用值）。
 - 标定：`ufactory/kinematics/calibration.py::build_calibrated_urdf`、`load_kinematics_calibration`（标定 YAML 在 `assets/urdf/<robot>/kinematics/{default,user}`）。
 
 **适配层设计（`core/uclient_core/backend/`）**
@@ -354,7 +355,7 @@ Uclient/
 | 里程碑 | 内容 | 预计 |
 |---|---|---|
 | M0 设计 | 本文档审核；建 Uclient 仓库骨架、CI 空跑（Linux 打包 + Windows 单元测试）| 0.5 周 |
-| M1 核心 | sidecar：适配层 + 自带 FK/Jacobian/IK、负载感知 gravity/RNEA + 金标准测试；Linux PyInstaller 产物 + 体积实测；锁定带官方额定扭矩的 `ufactory_genesis` tag（若已发布）| 1.5–2 周 |
+| M1 核心 | sidecar：适配层 + 自带 FK/Jacobian/IK、负载感知 gravity/RNEA + 金标准测试；Linux PyInstaller 产物 + 体积实测；锁定带官方最大关节扭矩的 `ufactory_genesis` tag（若已发布）| 1.5–2 周 |
 | M2 MVP 界面 | Tauri 壳 + Vue/Element Plus 界面 + 3D 视图 + 校核页（关节点动、TCP 输入 IK、扭矩面板、COM 标记、CSV）| 2 周 |
 | **v0.1.0** | Linux 安装包（deb）、中英文、README（含个人项目声明）| — |
 | M3 轨迹 | RNEA、轨迹插值、回放、uPlot τ(t) 曲线、HTML 报告 | 2 周 |
@@ -368,7 +369,7 @@ Uclient/
 - R1 `ufactory_genesis` 0.x 接口无兼容承诺（ROADMAP 明确），Uclient 锁定 commit，并在 CI 跑“import 不拉 torch”检查；适配层把依赖面限制在 `ufactory.robots`、`ufactory.config.loader`、`ufactory.kinematics.tcp_offset` 几个模块。
 - R2 自带 IK/负载实现由 Uclient 自己维护，与上游未来的实现可能有细微差异；用金标准和 `Jᵀ·F` 交叉校验约束。
 - R3 Pinocchio wheel 在 Windows 上的 PyInstaller 打包（cmeel 前缀、Boost.Python 动态库路径）可能需要自定义 hook；推迟到 M5，Windows 单元测试 job 先暴露问题。
-- R4 额定扭矩依赖 `ufactory_genesis` 即将发布的更新：发布前用当前值开发，金标准中的百分比需在锁定新 tag 时同步更新（扭矩绝对值不受影响）。
+- R4 最大关节扭矩依赖 `ufactory_genesis` 即将发布的更新：发布前用当前值开发，金标准中的百分比需在锁定新 tag 时同步更新（扭矩绝对值不受影响）。
 - R5 数值与真机不一致：URDF 惯性参数为名义值，不含摩擦、减速器效率和每台机器的标定；报告里必须写出这些假设。
 
 **已确认（v0.2–v0.3）**
@@ -384,9 +385,9 @@ Uclient/
 
 | ✔8 | 资源许可 | 按 `ufactory_genesis` NOTICE 署名直接随包分发，不再单独核验（§13）|
 | ✔9 | Windows 代码签名 | v0.1 不发 Windows 包，暂不涉及；M5 再定（§10）|
-| ✔10 | 额定扭矩来源 | 运行时从 `ufactory_genesis` 读取，不本地硬编码；锁定即将发布的官方额定值版本，金标准百分比随之更新（§9、§11）|
+| ✔10 | 最大关节扭矩来源 | 运行时从 `ufactory_genesis` 读取，不本地硬编码；锁定即将发布的官方最大扭矩值版本，金标准百分比随之更新（§9、§11）|
 | ✔11 | 机型范围 | xArm 系列只支持 `_1305`，不支持旧版本；另含 UF850、Lite6（§1）|
 
-**待确认问题：无。** 所有问题均已关闭。唯一的外部依赖是 `ufactory_genesis` 带官方额定扭矩的版本发布，发布后把 tag 告诉我即可锁定（不影响 M0–M2 开发）。
+**待确认问题：无。** 所有问题均已关闭。唯一的外部依赖是 `ufactory_genesis` 带官方最大关节扭矩的版本发布，发布后把 tag 告诉我即可锁定（不影响 M0–M2 开发）。
 
 > 注：`gripper.tool_tip_offset_z_m`（G2 0.1011 m、Lite6 0.0543 m）是 ufactory_genesis 抓取规划用的 link6→手指中间偏移，**不是 TCP**，Uclient 不使用它。

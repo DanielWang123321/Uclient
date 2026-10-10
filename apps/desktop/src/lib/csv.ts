@@ -1,7 +1,7 @@
 import type { TorqueResult } from '../rpc/types'
 
 export function torqueCsv(jointNames: string[], q: number[], t: TorqueResult): string {
-  const rows = [['joint', 'q_deg', 'tau_nm', 'tau_arm_nm', 'tau_payload_nm', 'rated_nm', 'utilization_pct']]
+  const rows = [['joint', 'q_deg', 'tau_nm', 'tau_arm_nm', 'tau_payload_nm', 'max_torque_nm', 'utilization_pct']]
   jointNames.forEach((n, i) =>
     rows.push([
       n,

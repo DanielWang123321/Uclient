@@ -25,7 +25,7 @@ Early development (milestone M0/M1, see [docs/DESIGN.md](docs/DESIGN.md) §14).
 | Linux deb packaging in CI | ✅ (unsigned, development builds) |
 | Trajectory + τ(t) curves (M3), workspace & calibration (M4) | ⏳ |
 
-Results are **static models**: nominal URDF inertia, no friction, gearbox efficiency or per-unit calibration. Rated torques are read at runtime from `ufactory_genesis` (currently pinned to commit `60fe926`, development values) and will switch to the release carrying official ratings.
+Results are **static models**: nominal URDF inertia, no friction, gearbox efficiency or per-unit calibration. Maximum joint torques ([UFACTORY joint parameters](https://docs.supportarticle.ufactory.cc/zhHans/support_articles/hardware/ufactory-joint-parameters.html)) are read at runtime from `ufactory_genesis` (pinned to commit `be49519`, which carries the official UFACTORY joint torque limits).
 
 ## Development (Linux)
 
