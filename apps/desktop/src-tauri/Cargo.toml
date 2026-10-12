@@ -1,6 +1,6 @@
 [package]
 name = "ugclient"
-version = "0.2.0"
+version = "0.3.0"
 description = "UGClient - kinematics/dynamics desktop client for UFACTORY arms (personal project, not an official UFACTORY product)"
 authors = ["Daniel Wang"]
 license = "MIT"

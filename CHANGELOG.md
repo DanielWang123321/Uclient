@@ -4,6 +4,8 @@ All notable changes to UGClient (formerly Uclient) are documented here. Format: 
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-12
+
 ### Changed
 - Compact motion bar (mockup v9): 240 px total height, 46 px header, 140 px XYZ/RPY pads, smaller buttons, value boxes and joint rows.
 - STOP moved out of the bar into a floating red button at the top right of the 3D view, level with the view toolbar. Behavior unchanged (state 4).
