@@ -59,3 +59,9 @@ body {
     --el-button-hover-bg-color: #5482f7; --el-button-hover-text-color: #fff; --el-button-hover-border-color: #5482f7; }
   .el-input-number__decrease, .el-input-number__increase { background: #2f3035; color: #e6e7ea; border-color: #3a3b40; }
 }
+
+// Settings dialog in the dark panel style (teleported to body, so styled globally).
+.el-dialog.dark-dialog { background: #1f2023; border-radius: 16px; padding: 16px;
+  .el-dialog__title { color: #e6e7ea; font-size: 15px; font-weight: 600; }
+  .el-dialog__headerbtn .el-dialog__close { color: #9a9ca3; }
+}

@@ -157,3 +157,86 @@ describe('motion store (simulation)', () => {
     expect(alert).toHaveBeenCalledTimes(1)
   })
 })
+
+describe('Home / Align click and hold', () => {
+  let unreachable = false
+  beforeEach(async () => {
+    alert.mockClear()
+    unreachable = false
+    setActivePinia(createPinia())
+    const handlers = {
+      'system.hello': () => HELLO,
+      'robot.load': () => LOAD,
+      'tcp.set': () => ({ ok: true }),
+      'payload.set': () => ({ ok: true }),
+      'kin.fk': () => ({ tcp_pose: [0, 0, 0, 0, 0, 0], flange_pose: [0, 0, 0, 0, 0, 0] }),
+      'dyn.gravity': () => ({ tau_nm: [0, 0, 0, 0, 0, 0], effort_limits_nm: [1, 1, 1, 1, 1, 1], utilization: [0, 0, 0, 0, 0, 0], over_limit: [] }),
+      'motion.align': () => {
+        if (unreachable) throw { code: 3001, message: 'unreachable' }
+        return { q_deg: [10, 20, 30, 40, 50, 60], tcp_pose: [0, 0, 0, 180, 0, 0] }
+      },
+    }
+    await useEngineStore().connect(async () => ({ port: 1, token: 't' }), () => new RpcClient(() => new FakeWs(handlers)))
+    await useRobotStore().load('uf850')
+  })
+  afterEach(() => useMotionStore().stop())
+
+  it('a Home click moves at most 1 deg per joint toward zero and ends in state 4', async () => {
+    const m = useMotionStore()
+    const robot = useRobotStore()
+    await robot.setQ([10, -5, 0, 0, 0, 0.4])
+    await m.goStep('home')
+    expect(robot.q[0]).toBeCloseTo(9)
+    expect(robot.q[1]).toBeCloseTo(-4.5) // proportional joint-space interpolation
+    expect(Math.max(...robot.q.map((v, i) => Math.abs(v - [10, -5, 0, 0, 0, 0.4][i])))).toBeLessThanOrEqual(1 + 1e-9)
+    expect(m.state).toBe(STATE.stopped)
+  })
+
+  it('an Align click steps 1 deg toward the align target', async () => {
+    const m = useMotionStore()
+    const robot = useRobotStore()
+    await m.goStep('align')
+    expect(robot.q[5]).toBeCloseTo(1)
+    expect(robot.q[0]).toBeCloseTo(10 / 60)
+    expect(m.state).toBe(STATE.stopped)
+  })
+
+  it('holding Home moves continuously and release stops immediately in state 4', async () => {
+    const m = useMotionStore()
+    const robot = useRobotStore()
+    m.speed = 100
+    await robot.setQ([90, 0, 0, 0, 0, 0])
+    const run = m.goStart('home')
+    await new Promise((r) => setTimeout(r, 200))
+    expect(m.state).toBe(STATE.moving)
+    m.stop()
+    await run
+    const q0 = robot.q[0]
+    await new Promise((r) => setTimeout(r, 120))
+    expect(robot.q[0]).toBe(q0) // nothing moves after release
+    expect(q0).toBeLessThan(90)
+    expect(q0).toBeGreaterThan(60)
+    expect(m.state).toBe(STATE.stopped)
+  })
+
+  it('holding Align until arrival stops at the target', async () => {
+    const m = useMotionStore()
+    const robot = useRobotStore()
+    m.speed = 100
+    await robot.setQ([10, 20, 30, 40, 50, 58])
+    await m.goStart('align')
+    expect(robot.q).toEqual([10, 20, 30, 40, 50, 60])
+    expect(m.state).toBe(STATE.stopped)
+  })
+
+  it('Align unreachable pops up before any motion, for click and hold', async () => {
+    const m = useMotionStore()
+    const robot = useRobotStore()
+    unreachable = true
+    await m.goStep('align')
+    await m.goStart('align')
+    expect(alert).toHaveBeenCalledTimes(2)
+    expect(robot.q).toEqual([0, 0, 0, 0, 0, 0])
+    expect(m.state).toBe(STATE.stopped)
+  })
+})

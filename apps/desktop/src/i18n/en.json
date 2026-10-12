@@ -37,7 +37,8 @@
     "tcp": "TCP",
     "com": "COM",
     "loading": "Loading model…",
-    "loadFailed": "Failed to load model"
+    "loadFailed": "Failed to load model",
+    "axes": "Axes: X red, Y green, Z blue"
   },
   "engine": {
     "connected": "Connected",
@@ -66,7 +67,10 @@
     "errLimit": "Joint limit reached.",
     "errJointLimit": "J{j} reached its joint limit.",
     "errUnreachable": "Target unreachable (workspace boundary, singularity or joint limit).",
-    "errAlign": "Cannot point the tool straight down by moving only the last three joints from this pose."
+    "errAlign": "Cannot point the tool straight down by moving only the last three joints from this pose.",
+    "errBoundary": "{axis} reached the safety boundary ({side} {limit}).",
+    "min": "min",
+    "max": "max"
   },
   "info": {
     "state": "State",
@@ -79,5 +83,23 @@
     "mode": "Mode",
     "position": "Position",
     "readOnly": "read-only"
+  },
+  "settings": {
+    "title": "Settings",
+    "jog": "Jog",
+    "safety": "Safety boundary",
+    "general": "General",
+    "about": "About",
+    "stepMm": "Click step, linear",
+    "stepDeg": "Click step, angular (joints, RPY)",
+    "jogHint": "Press and hold longer than {ms} ms for continuous motion. 100 % speed = {lin} mm/s linear, {ang} °/s angular (fixed for now).",
+    "safetyHint": "Boundary for {model} (stored per robot model). Jog, Home and Align stop at it. TCP limits are in the base frame; leave empty for unbounded. Joint limits are clamped inside the model limits.",
+    "unbounded": "unbounded",
+    "resetBoundary": "Reset to model limits",
+    "language": "Language",
+    "defaultRobot": "Default robot model",
+    "restoreSession": "Restore last session on startup",
+    "restoreHint": "Restores robot, end effector, TCP offset, payload and joint angles from the last run.",
+    "license": "License"
   }
 }

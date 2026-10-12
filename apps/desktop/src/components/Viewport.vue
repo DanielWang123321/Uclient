@@ -58,6 +58,8 @@ watch(show, (s) => {
       <button v-for="k in (['base', 'tcp', 'com'] as const)" :key="k" :class="{ off: !show[k] }" :data-test="`view-${k}`" @click="show[k] = !show[k]">
         {{ $t(`view.${k}`) }}
       </button>
+      <span class="sep">|</span>
+      <span class="legend" :title="$t('view.axes')"><i class="x">X</i><i class="y">Y</i><i class="z">Z</i></span>
     </div>
     <div v-if="state === 'loading'" class="overlay">{{ $t('view.loading') }}</div>
     <div v-if="state === 'error'" class="overlay err">{{ $t('view.loadFailed') }}</div>
@@ -74,6 +76,9 @@ watch(show, (s) => {
 .toolbar button:first-child { font-size: 15px; }
 .toolbar button.off { color: #6f7177; text-decoration: line-through; }
 .toolbar .sep { color: #888; }
+.legend { display: flex; gap: 8px; font-size: 12px; font-weight: 700; }
+.legend i { font-style: normal; }
+.legend .x { color: #e5383b; } .legend .y { color: #18c37a; } .legend .z { color: #3b6ef5; }
 .overlay { position: absolute; top: 64px; left: 50%; transform: translateX(-50%); color: #fff; background: rgba(0,0,0,.5); padding: 4px 10px; border-radius: 4px; }
 .overlay.err { background: rgba(200,40,40,.8); }
 </style>

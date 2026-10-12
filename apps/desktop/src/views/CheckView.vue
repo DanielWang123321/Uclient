@@ -8,9 +8,13 @@ import Viewport from '../components/Viewport.vue'
 import MotionBar from '../components/MotionBar.vue'
 import InfoPanel from '../components/InfoPanel.vue'
 import AppFooter from '../components/AppFooter.vue'
+import LangSwitch from '../components/LangSwitch.vue'
+import { useMotionStore } from '../stores/motion'
+
+const motion = useMotionStore()
 
 // Screen area covered by the panels, so the robot is centred in the free part of the scene.
-const insets = { left: 284, right: 274, top: 0, bottom: 388 }
+const insets = { left: 284, right: 274, top: 0, bottom: 260 }
 </script>
 
 <template>
@@ -27,6 +31,10 @@ const insets = { left: 284, right: 274, top: 0, bottom: 388 }
     </aside>
     <aside class="panel right dark-panel"><InfoPanel /></aside>
     <MotionBar class="bar" />
+    <div class="topright">
+      <LangSwitch />
+      <button class="stop" data-test="stop" @click="motion.stop()">STOP</button>
+    </div>
   </div>
 </template>
 
@@ -41,4 +49,8 @@ const insets = { left: 284, right: 274, top: 0, bottom: 388 }
 .bar { position: absolute; left: 284px; right: 274px; bottom: 12px; }
 .sep { border-top: 1px solid #333; margin: 14px 0; flex: none; }
 .grow { flex: 1; min-height: 14px; }
+.topright { position: absolute; top: 16px; right: 286px; z-index: 9; display: flex; align-items: center; gap: 12px; }
+.stop { background: #e5383b; color: #fff; font: inherit; font-weight: 700;
+  letter-spacing: 1px; padding: 10px 30px; font-size: 15px; border: 0; border-radius: 6px; cursor: pointer; box-shadow: 0 0 0 2px rgba(229, 56, 59, .35); }
+.stop:hover { background: #f04a4d; }
 </style>

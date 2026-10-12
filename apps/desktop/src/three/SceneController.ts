@@ -5,7 +5,27 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import URDFLoader, { type URDFRobot } from 'urdf-loader'
 
 export /** Camera distance factor for the robot framing (smaller = closer). */
-const VIEW_FIT = 1.6
+const VIEW_FIT = 1.35
+/** Solid coordinate axes, X red, Y green, Z blue (unlit, unaffected by fog, drawn over the robot meshes). */
+export const AXIS_COLORS = { x: 0xe5383b, y: 0x18c37a, z: 0x3b6ef5 } as const
+function makeAxes(len: number, r: number): THREE.Group {
+  const g = new THREE.Group()
+  const geo = new THREE.CylinderGeometry(r, r, len, 12)
+  geo.translate(0, len / 2, 0) // cylinder along +Y from the origin
+  const dirs: [keyof typeof AXIS_COLORS, THREE.Euler][] = [
+    ['x', new THREE.Euler(0, 0, -Math.PI / 2)],
+    ['y', new THREE.Euler(0, 0, 0)],
+    ['z', new THREE.Euler(Math.PI / 2, 0, 0)],
+  ]
+  for (const [k, rot] of dirs) {
+    const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: AXIS_COLORS[k], fog: false, depthTest: false }))
+    m.rotation.copy(rot)
+    m.renderOrder = 10
+    g.add(m)
+  }
+  return g
+}
+
 const ASSET_BASE = 'robot-assets/'
 
 function eulerXYZ(rpyDeg: number[]): THREE.Euler {
@@ -25,8 +45,8 @@ export class SceneController {
   readonly controls: OrbitControls
   private robot: URDFRobot | null = null
   private eeLink = 'link6'
-  private tcpAxes = new THREE.AxesHelper(0.08)
-  private baseAxes = new THREE.AxesHelper(0.15)
+  private tcpAxes = makeAxes(0.08, 0.0025)
+  private baseAxes = makeAxes(0.15, 0.004)
   private com = new THREE.Mesh(
     new THREE.SphereGeometry(1, 20, 14),
     new THREE.MeshStandardMaterial({ color: 0xff9f1c, emissive: 0x442200 }),

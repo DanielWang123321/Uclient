@@ -37,7 +37,8 @@
     "tcp": "TCP",
     "com": "COM",
     "loading": "正在加载模型…",
-    "loadFailed": "模型加载失败"
+    "loadFailed": "模型加载失败",
+    "axes": "坐标轴：X 红、Y 绿、Z 蓝"
   },
   "engine": {
     "connected": "已连接",
@@ -66,7 +67,10 @@
     "errLimit": "已到达关节限位。",
     "errJointLimit": "J{j} 已到达关节限位。",
     "errUnreachable": "目标不可达（超出工作空间、接近奇异点或关节限位）。",
-    "errAlign": "从当前姿态只转动最后三个关节，无法让末端朝下。"
+    "errAlign": "从当前姿态只转动最后三个关节，无法让末端朝下。",
+    "errBoundary": "{axis} 已到达安全边界（{side} {limit}）。",
+    "min": "最小",
+    "max": "最大"
   },
   "info": {
     "state": "状态",
@@ -79,5 +83,23 @@
     "mode": "模式",
     "position": "位置",
     "readOnly": "只读"
+  },
+  "settings": {
+    "title": "设置",
+    "jog": "点动",
+    "safety": "安全边界",
+    "general": "通用",
+    "about": "关于",
+    "stepMm": "单击步长（直线）",
+    "stepDeg": "单击步长（角度：关节、RPY）",
+    "jogHint": "按住超过 {ms} ms 为连续运动。100% 速度 = 直线 {lin} mm/s、角度 {ang} °/s（暂为固定值）。",
+    "safetyHint": "{model} 的安全边界（按机型分别保存）。点动、回零和对齐到达边界即停止。TCP 范围为基坐标系，留空表示不限制；关节范围限制在机型限位以内。",
+    "unbounded": "不限制",
+    "resetBoundary": "恢复为机型限位",
+    "language": "语言",
+    "defaultRobot": "默认机型",
+    "restoreSession": "启动时恢复上次配置",
+    "restoreHint": "恢复上次的机型、末端工具、TCP 偏移、负载和关节角度。",
+    "license": "许可证"
   }
 }
